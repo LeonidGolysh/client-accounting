@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Client</title>
+</head>
+    <body>
+        <h1>Create client</h1>
+        <form th:action="@{/create}" method="post" th:object="${clientEntity}">
+            <div>
+             <input th:field="*{name}" type="text" name="name" placeholder="Name" />
+            </div>
+            <div>
+                <input th:field="*{phoneNumber}" type="text" name="phone" placeholder="Phone" />
+            </div>
+            <input type="submit" value="Create client">
+        </form>
+    </body>
+</html>
