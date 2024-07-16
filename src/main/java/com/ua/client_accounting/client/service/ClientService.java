@@ -2,6 +2,8 @@ package com.ua.client_accounting.client.service;
 
 import com.ua.client_accounting.client.dto.create.CreateClientRequest;
 import com.ua.client_accounting.client.dto.create.CreateClientResponse;
+import com.ua.client_accounting.client.dto.update.UpdateClientRequest;
+import com.ua.client_accounting.client.dto.update.UpdateClientResponse;
 import com.ua.client_accounting.client.entity.Client;
 
 import java.util.List;
@@ -12,4 +14,5 @@ public interface ClientService {
     CreateClientResponse createClient(CreateClientRequest request);
     Client getClientById(UUID id);
     void deleteClient(UUID id);
+    UpdateClientResponse updateClient(UUID id, UpdateClientRequest request);
 }
