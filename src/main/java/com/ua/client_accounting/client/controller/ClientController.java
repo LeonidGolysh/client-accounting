@@ -28,10 +28,10 @@ public class ClientController {
     @PostMapping("/create")
     public String createClient(@ModelAttribute("clientEntity") CreateClientRequest request, Model model) {
         clientService.createClient(request);
-        return "redirect:/client";
+        return "redirect:/clients";
     }
 
-    @GetMapping("/client")
+    @GetMapping("/clients")
     public String showClients(Model model) {
         model.addAttribute("clients", clientService.getAllClients());
         return "clients/client";
@@ -45,7 +45,7 @@ public class ClientController {
     @PostMapping("/delete/{id}")
     public String deleteClient(@PathVariable UUID id) {
         clientService.deleteClient(id);
-        return "redirect:/client";
+        return "redirect:/clients";
     }
 
     @GetMapping("/edit/{id}")
@@ -58,6 +58,6 @@ public class ClientController {
     @PostMapping("/edit/{id}")
     public String updateClient(@PathVariable UUID id, @ModelAttribute UpdateClientRequest updateClientRequest) {
         clientService.updateClient(id, updateClientRequest);
-        return "redirect:/client";
+        return "redirect:/clients";
     }
 }
