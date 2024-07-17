@@ -4,7 +4,6 @@ import com.ua.client_accounting.client.dto.create.CreateClientRequest;
 import com.ua.client_accounting.client.dto.update.UpdateClientRequest;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.service.ClientService;
-import com.ua.client_accounting.client.service.ClientServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,20 +14,15 @@ import java.util.UUID;
 
 @Controller
 @AllArgsConstructor
-public class MainController {
+public class ClientController {
 
     @Autowired
     private final ClientService clientService;
 
-    @GetMapping("/")
-    public String main() {
-        return "main";
-    }
-
     @GetMapping("/create")
     public String createClient(Model model) {
         model.addAttribute("clientEntity", new CreateClientRequest());
-        return "createClient";
+        return "clients/create/create-client";
     }
 
     @PostMapping("/create")
@@ -40,7 +34,7 @@ public class MainController {
     @GetMapping("/client")
     public String showClients(Model model) {
         model.addAttribute("clients", clientService.getAllClients());
-        return "client";
+        return "clients/client";
     }
 
     @GetMapping("{id}")
@@ -58,7 +52,7 @@ public class MainController {
     public String showEditForm(@PathVariable UUID id, Model model) {
         Client client = clientService.getClientById(id);
         model.addAttribute("client", client);
-        return "editClient";
+        return "clients/edit/edit-client";
     }
 
     @PostMapping("/edit/{id}")

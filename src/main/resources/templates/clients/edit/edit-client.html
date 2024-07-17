@@ -10,14 +10,17 @@
         <div class="container">
             <h1>Edit Client</h1>
             <form th:action="@{/edit/{id}(id=${client.id})}" th:object="${client}" method="post">
+
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter Name" />
                 </div>
+
                 <div class="form-group">
                     <label for="phoneNumber">Phone Number</label>
                     <input type="text" class="form-control" id="phoneNumber" th:field="*{phoneNumber}" placeholder="Enter Phone Number" />
                 </div>
+
                 <button type="submit" class="btn btn-primary">Save</button>
                 <a th:href="@{/client}" class="btn btn-secondary">Cancel</a>
             </form>

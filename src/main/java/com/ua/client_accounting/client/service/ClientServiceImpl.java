@@ -6,9 +6,6 @@ import com.ua.client_accounting.client.dto.update.UpdateClientRequest;
 import com.ua.client_accounting.client.dto.update.UpdateClientResponse;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.repository.ClientRepository;
-import lombok.AllArgsConstructor;
-import lombok.Cleanup;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +15,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-
 public class ClientServiceImpl implements ClientService{
 
     @Autowired
@@ -64,9 +60,11 @@ public class ClientServiceImpl implements ClientService{
         client = clientRepository.save(client);
 
         UpdateClientResponse response = new UpdateClientResponse();
+
         response.setClientId(client.getId());
         response.setName(client.getName());
         response.setPhoneNumber(client.getPhoneNumber());
+
         return response;
     }
 }
