@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,5 +50,42 @@ class ClientServiceImplTest {
         assertEquals("098-765-4321", result.get(1).getPhoneNumber());
 
         verify(clientRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getClientById_Success_Test() {
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+        Client client = new Client(clientId, "Client 1", "123-456-7890");
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+
+        //Act
+        Client result = clientServiceImpl.getClientById(clientId);
+
+        //Assert
+        assertNotNull(result);
+        assertEquals(clientId, result.getId());
+        assertEquals("Client 1", result.getName());
+        assertEquals("123-456-7890", result.getPhoneNumber());
+
+        verify(clientRepository, times(1)).findById(clientId);
+    }
+
+    @Test
+    void getClientById_NotFound_Test() {
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
+
+        //Act & Assert
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            clientServiceImpl.getClientById(clientId);
+        });
+
+        assertEquals("Client not found", exception.getMessage());
+
+        verify(clientRepository, times(1)).findById(clientId);
     }
 }
