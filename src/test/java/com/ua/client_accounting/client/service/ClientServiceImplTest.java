@@ -1,5 +1,7 @@
 package com.ua.client_accounting.client.service;
 
+import com.ua.client_accounting.client.dto.create.CreateClientRequest;
+import com.ua.client_accounting.client.dto.create.CreateClientResponse;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.repository.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,5 +89,35 @@ class ClientServiceImplTest {
         assertEquals("Client not found", exception.getMessage());
 
         verify(clientRepository, times(1)).findById(clientId);
+    }
+
+    @Test
+    void createClientTest() {
+        //Arrange
+        CreateClientRequest request = new CreateClientRequest();
+        request.setName("New Client");
+        request.setPhoneNumber("123-456");
+
+        UUID generateClientId = UUID.randomUUID();
+        Client client = new Client();
+
+        client.setId(generateClientId);
+        client.setName(request.getName());
+        client.setPhoneNumber(request.getPhoneNumber());
+
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocationOnMock -> {
+            Client savedClient = invocationOnMock.getArgument(0);
+            savedClient.setId(generateClientId);    // Simulate ID generation on save
+            return savedClient;
+        });
+
+        //Act
+        CreateClientResponse response = clientServiceImpl.createClient(request);
+
+        //Assert
+        assertNotNull(response);
+        assertEquals(generateClientId, response.getClientId());
+
+        verify(clientRepository, times(1)).save(any(Client.class));
     }
 }
