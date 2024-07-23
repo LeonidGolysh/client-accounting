@@ -120,4 +120,36 @@ class ClientServiceImplTest {
 
         verify(clientRepository, times(1)).save(any(Client.class));
     }
+
+    @Test
+    void deleteClient_Success_Test(){
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+        Client client = new Client(clientId, "Client 1", "123-456-7890");
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+
+        //Act
+        clientServiceImpl.deleteClient(clientId);
+
+        //Assert
+        verify(clientRepository, times(1)).delete(client);
+    }
+
+    @Test
+    void deleteClient_NotFound_Test(){
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            clientServiceImpl.deleteClient(clientId);
+        });
+
+        assertEquals("Client not found", exception.getMessage());
+
+        verify(clientRepository, times(0)).delete(any(Client.class));
+    }
 }
