@@ -1,63 +1,54 @@
 package com.ua.client_accounting.client.controller;
 
 import com.ua.client_accounting.client.dto.create.CreateClientRequest;
+import com.ua.client_accounting.client.dto.create.CreateClientResponse;
 import com.ua.client_accounting.client.dto.update.UpdateClientRequest;
+import com.ua.client_accounting.client.dto.update.UpdateClientResponse;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.service.ClientService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
+@RequestMapping("/api/V2/clients")
 @AllArgsConstructor
 public class ClientController {
 
     @Autowired
     private final ClientService clientService;
 
-    @GetMapping("/create")
-    public String createClient(Model model) {
-        model.addAttribute("clientEntity", new CreateClientRequest());
-        return "clients/create/create-client";
-    }
-
     @PostMapping("/create")
-    public String createClient(@ModelAttribute("clientEntity") CreateClientRequest request, Model model) {
-        clientService.createClient(request);
-        return "redirect:/clients";
+    public ResponseEntity<CreateClientResponse> createClient(@RequestBody CreateClientRequest request) {
+        CreateClientResponse response = clientService.createClient(request);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/clients")
-    public String showClients(Model model) {
-        model.addAttribute("clients", clientService.getAllClients());
-        return "clients/client";
+    @GetMapping
+    public ResponseEntity<List<Client>> getAllClients() {
+        List<Client> clients = clientService.getAllClients();
+        return ResponseEntity.ok(clients);
     }
 
-    @GetMapping("{id}")
-    public Client getClient(@PathVariable UUID id) {
-        return clientService.getClientById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<Client> getClient(@PathVariable UUID id) {
+        Client clients = clientService.getClientById(id);
+        return ResponseEntity.ok(clients);
     }
 
-    @PostMapping("/delete/{id}")
-    public String deleteClient(@PathVariable UUID id) {
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<UpdateClientResponse> updateClient(@PathVariable UUID id, @RequestBody UpdateClientRequest request) {
+        UpdateClientResponse response = clientService.updateClient(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteClient(@PathVariable UUID id) {
         clientService.deleteClient(id);
-        return "redirect:/clients";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable UUID id, Model model) {
-        Client client = clientService.getClientById(id);
-        model.addAttribute("client", client);
-        return "clients/edit/edit-client";
-    }
-
-    @PostMapping("/edit/{id}")
-    public String updateClient(@PathVariable UUID id, @ModelAttribute UpdateClientRequest updateClientRequest) {
-        clientService.updateClient(id, updateClientRequest);
-        return "redirect:/clients";
+        return ResponseEntity.noContent().build();
     }
 }
