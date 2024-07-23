@@ -2,6 +2,8 @@ package com.ua.client_accounting.client.service;
 
 import com.ua.client_accounting.client.dto.create.CreateClientRequest;
 import com.ua.client_accounting.client.dto.create.CreateClientResponse;
+import com.ua.client_accounting.client.dto.update.UpdateClientRequest;
+import com.ua.client_accounting.client.dto.update.UpdateClientResponse;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.repository.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -151,5 +153,52 @@ class ClientServiceImplTest {
         assertEquals("Client not found", exception.getMessage());
 
         verify(clientRepository, times(0)).delete(any(Client.class));
+    }
+
+    @Test
+    void updateClient_Success_Test(){
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+        Client existingClient = new Client(clientId, "Exist Client", "111-2345");
+
+        UpdateClientRequest request = new UpdateClientRequest();
+        request.setName("Update Client");
+        request.setPhoneNumber("111-6789");
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
+
+        //Act
+        UpdateClientResponse response = clientServiceImpl.updateClient(clientId, request);
+
+        //Assert
+        assertNotNull(response);
+        assertEquals(clientId, response.getClientId());
+        assertEquals("Update Client", response.getName());
+        assertEquals("111-6789", response.getPhoneNumber());
+
+        verify(clientRepository, times(1)).findById(clientId);
+        verify(clientRepository, times(1)).save(existingClient);
+    }
+
+    @Test
+    void updateClient_NotFount_Test(){
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+        UpdateClientRequest request = new UpdateClientRequest();
+        request.setName("Update Client");
+        request.setPhoneNumber("111-6789");
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            clientServiceImpl.updateClient(clientId, request);
+        });
+
+        assertEquals("Client not found", exception.getMessage());
+
+        verify(clientRepository, times(1)).findById(clientId);
+        verify(clientRepository, times(0)).save(any(Client.class));
     }
 }
