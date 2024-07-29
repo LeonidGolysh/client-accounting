@@ -92,4 +92,26 @@ class ClientControllerTest {
 
         verify(clientService, times(1)).getAllClients();
     }
+
+    @Test
+    void getClient_Success_Test() throws Exception {
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+        Client client = new Client(clientId, "Client", "123-456-7890");
+
+        when(clientService.getClientById(clientId)).thenReturn(client);
+
+        //Convert client to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String clientJson = objectMapper.writeValueAsString(client);
+
+        //Act & Assert
+        mockMvc.perform(get("/api/V2/clients/" + clientId.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(clientJson));
+
+        verify(clientService, times(1)).getClientById(clientId);
+    }
 }
