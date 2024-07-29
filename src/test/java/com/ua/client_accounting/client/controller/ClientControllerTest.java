@@ -3,6 +3,7 @@ package com.ua.client_accounting.client.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ua.client_accounting.client.dto.create.CreateClientRequest;
 import com.ua.client_accounting.client.dto.create.CreateClientResponse;
+import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.service.ClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -63,5 +67,29 @@ class ClientControllerTest {
                 .andExpect(jsonPath("$.clientId").value(generateId.toString()));
 
         verify(clientService, times(1)).createClient(any(CreateClientRequest.class));
+    }
+
+    @Test
+    void getAllClientTest() throws Exception{
+        //Arrange
+        Client client1 = new Client(UUID.randomUUID(), "Client 1", "123-456-7890");
+        Client client2 = new Client(UUID.randomUUID(), "Client 2", "098-765-4321");
+
+        List<Client> clients = Arrays.asList(client1, client2);
+
+        when(clientService.getAllClients()).thenReturn(clients);
+
+        //Convert clients to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String clientsJson = objectMapper.writeValueAsString(clients);
+
+        //Act & Assert
+        mockMvc.perform(get("/api/V2/clients")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(clientsJson));
+
+        verify(clientService, times(1)).getAllClients();
     }
 }
