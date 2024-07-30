@@ -20,8 +20,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -113,5 +112,20 @@ class ClientControllerTest {
                 .andExpect(content().json(clientJson));
 
         verify(clientService, times(1)).getClientById(clientId);
+    }
+
+    @Test
+    void deleteClient_Success_Test() throws Exception {
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+
+        doNothing().when(clientService).deleteClient(clientId);
+
+        //Act & Assert
+        mockMvc.perform(delete("/api/V2/clients/delete/" + clientId.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        verify(clientService, times(1)).deleteClient(clientId);
     }
 }
