@@ -3,6 +3,8 @@ package com.ua.client_accounting.client.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ua.client_accounting.client.dto.create.CreateClientRequest;
 import com.ua.client_accounting.client.dto.create.CreateClientResponse;
+import com.ua.client_accounting.client.dto.update.UpdateClientRequest;
+import com.ua.client_accounting.client.dto.update.UpdateClientResponse;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.service.ClientService;
 import org.junit.jupiter.api.BeforeEach;
@@ -127,5 +129,39 @@ class ClientControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(clientService, times(1)).deleteClient(clientId);
+    }
+
+    @Test
+    void updateClientTest() throws Exception{
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+
+        UpdateClientRequest request = new UpdateClientRequest();
+        request.setName("Update Client");
+        request.setPhoneNumber("111-6789");
+
+        UpdateClientResponse response = new UpdateClientResponse();
+        response.setClientId(clientId);
+        response.setName("Update Client");
+        response.setPhoneNumber("111-6789");
+
+        when(clientService.updateClient(eq(clientId), any(UpdateClientRequest.class))).thenReturn(response);
+
+        //Convert request to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        //Convert response to JSON
+        String responseJson = objectMapper.writeValueAsString(response);
+
+        //Act & Assert
+        mockMvc.perform(put("/api/V2/clients/edit/" + clientId.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(responseJson));
+
+        verify(clientService,times(1)).updateClient(eq(clientId), any(UpdateClientRequest.class));
     }
 }
