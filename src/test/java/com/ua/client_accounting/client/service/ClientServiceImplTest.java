@@ -98,7 +98,7 @@ class ClientServiceImplTest {
         //Arrange
         CreateClientRequest request = new CreateClientRequest();
         request.setName("New Client");
-        request.setPhoneNumber("123-456");
+        request.setPhoneNumber("1234567890");
 
         UUID generateClientId = UUID.randomUUID();
         Client client = new Client();
@@ -127,7 +127,7 @@ class ClientServiceImplTest {
     void deleteClient_Success_Test(){
         //Arrange
         UUID clientId = UUID.randomUUID();
-        Client client = new Client(clientId, "Client 1", "123-456-7890");
+        Client client = new Client(clientId, "Client 1", "123-4567890");
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
 
@@ -159,11 +159,11 @@ class ClientServiceImplTest {
     void updateClient_Success_Test(){
         //Arrange
         UUID clientId = UUID.randomUUID();
-        Client existingClient = new Client(clientId, "Exist Client", "111-2345");
+        Client existingClient = new Client(clientId, "Exist Client", "1112345890");
 
         UpdateClientRequest request = new UpdateClientRequest();
         request.setName("Update Client");
-        request.setPhoneNumber("111-6789");
+        request.setPhoneNumber("1116789890");
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
         when(clientRepository.save(any(Client.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
@@ -175,7 +175,7 @@ class ClientServiceImplTest {
         assertNotNull(response);
         assertEquals(clientId, response.getClientId());
         assertEquals("Update Client", response.getName());
-        assertEquals("111-6789", response.getPhoneNumber());
+        assertEquals("1116789890", response.getPhoneNumber());
 
         verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, times(1)).save(existingClient);
@@ -187,7 +187,7 @@ class ClientServiceImplTest {
         UUID clientId = UUID.randomUUID();
         UpdateClientRequest request = new UpdateClientRequest();
         request.setName("Update Client");
-        request.setPhoneNumber("111-6789");
+        request.setPhoneNumber("1116789890");
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 
