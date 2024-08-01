@@ -30,7 +30,13 @@ public class ClientServiceImpl implements ClientService{
         Client client = new Client();
 
         client.setName(request.getName());
-        client.setPhoneNumber(request.getPhoneNumber());
+        String phoneNumber = request.getPhoneNumber();
+
+        if (!isValidPhoneNumber(phoneNumber)) {
+            throw new IllegalArgumentException("Phone number must be either or exactly 10 digits long.");
+        }
+
+        client.setPhoneNumber(phoneNumber);
 
         clientRepository.save(client);
 
@@ -38,6 +44,10 @@ public class ClientServiceImpl implements ClientService{
         response.setClientId(client.getId());
 
         return response;
+    }
+
+    private boolean isValidPhoneNumber(String phoneNumber) {
+        return phoneNumber == null || phoneNumber.matches("\\d{10}") || phoneNumber.isEmpty();
     }
 
     @Override
@@ -56,7 +66,13 @@ public class ClientServiceImpl implements ClientService{
         Client client = getClientById(id);
 
         client.setName(request.getName());
-        client.setPhoneNumber(request.getPhoneNumber());
+        String phoneNumber = request.getPhoneNumber();
+
+        if (!isValidPhoneNumber(phoneNumber)) {
+            throw new IllegalArgumentException("Phone number must be either or exactly 9 digits long.");
+        }
+
+        client.setPhoneNumber(phoneNumber);
         client = clientRepository.save(client);
 
         UpdateClientResponse response = new UpdateClientResponse();
