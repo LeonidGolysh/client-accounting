@@ -12,10 +12,10 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class CarServiceImplTest {
@@ -65,5 +65,45 @@ class CarServiceImplTest {
         assertEquals("0987654321", result.get(1).getClient().getPhoneNumber());
 
         verify(carRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getCarById_Success_Test() {
+        //Assert
+        UUID carId = UUID.randomUUID();
+        Client client = new Client(UUID.randomUUID(), "Client", "1234567890");
+        Car car = new Car(carId, client, "BMW", "Red", "ABC1234");
+
+        when(carRepository.findById(carId)).thenReturn(Optional.of(car));
+
+        //Act
+        Car result = carService.getCarById(carId);
+
+        //Assert
+        assertNotNull(result);
+        assertEquals(carId, result.getId());
+        assertEquals("Client", result.getClient().getName());
+        assertEquals("1234567890", result.getClient().getPhoneNumber());
+        assertEquals("BMW", result.getCarModel());
+        assertEquals("Red", result.getCarColor());
+        assertEquals("ABC1234", result.getCarNumberPlate());
+
+        verify(carRepository, times(1)).findById(carId);
+    }
+
+    @Test
+    void getCarById_NotFound_Test() {
+        //Assert
+        UUID carId = UUID.randomUUID();
+        when(carRepository.findById(carId)).thenReturn(Optional.empty());
+
+        //Act & Assert
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+           carService.getCarById(carId);
+        });
+
+        assertEquals("Car Not Found", exception.getMessage());
+
+        verify(carRepository, times(1)).findById(carId);
     }
 }
