@@ -1,5 +1,7 @@
 package com.ua.client_accounting.car.service;
 
+import com.ua.client_accounting.car.dto.create.CreateCarRequest;
+import com.ua.client_accounting.car.dto.create.CreateCarResponse;
 import com.ua.client_accounting.car.entity.Car;
 import com.ua.client_accounting.car.repository.CarRepository;
 import com.ua.client_accounting.client.entity.Client;
@@ -105,5 +107,62 @@ class CarServiceImplTest {
         assertEquals("Car Not Found", exception.getMessage());
 
         verify(carRepository, times(1)).findById(carId);
+    }
+
+    @Test
+    void createCarTest() {
+        //Assert
+        UUID clientId = UUID.randomUUID();
+        UUID carId = UUID.randomUUID();
+
+        Client client = new Client(clientId, "Client", "1234567890");
+
+        CreateCarRequest request = new CreateCarRequest();
+        request.setClientId(clientId);
+        request.setCarModel("BMW");
+        request.setCarColor("Red");
+        request.setCarNumberPlate("ABC1234");
+
+        Car car = new Car();
+        car.setId(carId);
+        car.setClient(client);
+        car.setCarModel(request.getCarModel());
+        car.setCarColor(request.getCarColor());
+        car.setCarNumberPlate(request.getCarNumberPlate());
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+        when(carRepository.save(any(Car.class))).thenAnswer(invocationOnMock -> {
+           Car saveCar = invocationOnMock.getArgument(0);
+           saveCar.setId(carId);
+           return saveCar;
+        });
+
+        //Act
+        CreateCarResponse response = carService.createCar(request);
+
+        //Assert
+        assertNotNull(response);
+        assertEquals(carId, response.getCarId());
+        verify(clientRepository, times(1)).findById(clientId);
+        verify(carRepository, times(1)).save(any(Car.class));
+    }
+
+    @Test
+    void createCar_ClientNotFound_Test() {
+        //Assert
+        UUID clientId = UUID.randomUUID();
+
+        CreateCarRequest request = new CreateCarRequest();
+        request.setClientId(clientId);
+        request.setCarModel("BMW");
+        request.setCarColor("Red");
+        request.setCarNumberPlate("ABC1234");
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
+
+        //Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> carService.createCar(request));
+        verify(clientRepository, times(1)).findById(clientId);
+        verify(carRepository, never()).save(any(Car.class));
     }
 }
