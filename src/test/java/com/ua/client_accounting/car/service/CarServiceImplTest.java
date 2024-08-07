@@ -165,4 +165,38 @@ class CarServiceImplTest {
         verify(clientRepository, times(1)).findById(clientId);
         verify(carRepository, never()).save(any(Car.class));
     }
+
+    @Test
+    void deleteCar_Success_Test() {
+        //Arrange
+        UUID clientId = UUID.randomUUID();
+        UUID carId = UUID.randomUUID();
+
+        Client client = new Client(clientId, "Bob", "1234567890");
+        Car car = new Car(carId, client, "BMW", "Red", "ABC123");
+
+        when(carRepository.findById(carId)).thenReturn(Optional.of(car));
+
+        //Act
+        carService.deleteCar(carId);
+
+        //Assert
+        verify(carRepository, times(1)).delete(car);
+    }
+
+    @Test
+    void deleteClient_NotFound_Test() {
+        //Arrange
+        UUID carId = UUID.randomUUID();
+
+        when(carRepository.findById(carId)).thenReturn(Optional.empty());
+
+        //Act & Assert
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+           carService.deleteCar(carId);
+        });
+
+        assertEquals("Car Not Found", exception.getMessage());
+        verify(carRepository, times(0)).delete(any(Car.class));
+    }
 }
