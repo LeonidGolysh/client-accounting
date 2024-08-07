@@ -2,10 +2,13 @@ package com.ua.client_accounting.car.service;
 
 import com.ua.client_accounting.car.dto.create.CreateCarRequest;
 import com.ua.client_accounting.car.dto.create.CreateCarResponse;
+import com.ua.client_accounting.car.dto.update.UpdateCarRequest;
+import com.ua.client_accounting.car.dto.update.UpdateCarResponse;
 import com.ua.client_accounting.car.entity.Car;
 import com.ua.client_accounting.car.repository.CarRepository;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.repository.ClientRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -21,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class CarServiceImplTest {
+    static UUID clientId;
+    static UUID carId;
 
     @InjectMocks
     CarServiceImpl carService;
@@ -31,6 +36,12 @@ class CarServiceImplTest {
     @Mock
     ClientRepository clientRepository;
 
+    @BeforeAll
+    static void setUpBeforeClass() {
+        clientId = UUID.randomUUID();
+        carId = UUID.randomUUID();
+    }
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -39,11 +50,11 @@ class CarServiceImplTest {
     @Test
     void getAllCarsTest() {
         //Arrange
-        Client client1 = new Client(UUID.randomUUID(), "Client 1", "1234567890");
-        Client client2 = new Client(UUID.randomUUID(), "Client 2", "0987654321");
+        Client client1 = new Client(clientId, "Client 1", "1234567890");
+        Client client2 = new Client(clientId, "Client 2", "0987654321");
 
-        Car car1 = new Car(UUID.randomUUID(), client1, "BMW", "Red", "XY1234YZ");
-        Car car2 = new Car(UUID.randomUUID(), client2, "Honda", "Blue", "AB4444BC");
+        Car car1 = new Car(carId, client1, "BMW", "Red", "XY1234YZ");
+        Car car2 = new Car(carId, client2, "Honda", "Blue", "AB4444BC");
 
         List<Car> cars = Arrays.asList(car1, car2);
 
@@ -72,8 +83,7 @@ class CarServiceImplTest {
     @Test
     void getCarById_Success_Test() {
         //Assert
-        UUID carId = UUID.randomUUID();
-        Client client = new Client(UUID.randomUUID(), "Client", "1234567890");
+        Client client = new Client(clientId, "Client", "1234567890");
         Car car = new Car(carId, client, "BMW", "Red", "ABC1234");
 
         when(carRepository.findById(carId)).thenReturn(Optional.of(car));
@@ -96,7 +106,6 @@ class CarServiceImplTest {
     @Test
     void getCarById_NotFound_Test() {
         //Assert
-        UUID carId = UUID.randomUUID();
         when(carRepository.findById(carId)).thenReturn(Optional.empty());
 
         //Act & Assert
@@ -112,9 +121,6 @@ class CarServiceImplTest {
     @Test
     void createCarTest() {
         //Assert
-        UUID clientId = UUID.randomUUID();
-        UUID carId = UUID.randomUUID();
-
         Client client = new Client(clientId, "Client", "1234567890");
 
         CreateCarRequest request = new CreateCarRequest();
@@ -150,8 +156,6 @@ class CarServiceImplTest {
     @Test
     void createCar_ClientNotFound_Test() {
         //Assert
-        UUID clientId = UUID.randomUUID();
-
         CreateCarRequest request = new CreateCarRequest();
         request.setClientId(clientId);
         request.setCarModel("BMW");
@@ -169,9 +173,6 @@ class CarServiceImplTest {
     @Test
     void deleteCar_Success_Test() {
         //Arrange
-        UUID clientId = UUID.randomUUID();
-        UUID carId = UUID.randomUUID();
-
         Client client = new Client(clientId, "Bob", "1234567890");
         Car car = new Car(carId, client, "BMW", "Red", "ABC123");
 
@@ -187,8 +188,6 @@ class CarServiceImplTest {
     @Test
     void deleteClient_NotFound_Test() {
         //Arrange
-        UUID carId = UUID.randomUUID();
-
         when(carRepository.findById(carId)).thenReturn(Optional.empty());
 
         //Act & Assert
@@ -198,5 +197,58 @@ class CarServiceImplTest {
 
         assertEquals("Car Not Found", exception.getMessage());
         verify(carRepository, times(0)).delete(any(Car.class));
+    }
+
+    @Test
+    void updateCar_Success_Test() {
+        //Arrange
+        Client client = new Client(clientId, "Bob", "1234567890");
+        Car existingCar = new Car(carId, client, "BMW", "Red", "ABC123");
+
+        UpdateCarRequest request = new UpdateCarRequest();
+        request.setClientId(clientId);
+        request.setCarModel("Update Honda");
+        request.setCarColor("Blue");
+        request.setCarNumberPlate("DFG123");
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+        when(carRepository.findById(carId)).thenReturn(Optional.of(existingCar));
+        when(carRepository.save(any(Car.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
+
+        //Act
+        UpdateCarResponse response = carService.updateCar(carId, request);
+
+        //Assert
+        assertNotNull(response);
+        assertEquals(carId, response.getCarId());
+        assertEquals(clientId, response.getClientId());
+        assertEquals("Update Honda", response.getCarModel());
+        assertEquals("Blue", response.getCarColor());
+        assertEquals("DFG123", response.getCarNumberPlate());
+
+        verify(carRepository, times(1)).findById(carId);
+        verify(carRepository, times(1)).save(existingCar);
+    }
+
+    @Test
+    void updateCar_NotFound_Test() {
+        //Arrange
+        UpdateCarRequest request = new UpdateCarRequest();
+        request.setClientId(clientId);
+        request.setCarModel("Update Honda");
+        request.setCarColor("Blue");
+        request.setCarNumberPlate("DFG123");
+
+        when(carRepository.findById(carId)).thenReturn(Optional.empty());
+
+        //Act & Assert
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+           carService.updateCar(carId, request);
+        });
+
+        assertEquals("Car Not Found", exception.getMessage());
+
+        verify(carRepository, times(1)).findById(carId);
+        verify(carRepository, times(0)).save(any(Car.class));
     }
 }
