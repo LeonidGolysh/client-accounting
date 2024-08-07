@@ -26,6 +26,7 @@ public class CarServiceImpl implements CarService{
         return carRepository.findAll();
     }
 
+    @Override
     public CreateCarResponse createCar(CreateCarRequest request) {
         Client client = clientRepository.findById(request.getClientId())
                 .orElseThrow(() -> new IllegalArgumentException("Client Not Found"));
@@ -58,25 +59,26 @@ public class CarServiceImpl implements CarService{
 
     @Override
     public UpdateCarResponse updateCar(UUID carId, UpdateCarRequest request) {
+        Car existingCar = carRepository.findById(carId)
+                .orElseThrow(() -> new IllegalArgumentException("Car Not Found"));
+
         Client client = clientRepository.findById(request.getClientId())
                 .orElseThrow(() -> new IllegalArgumentException("Client Not Found"));
 
-        Car car = getCarById(carId);
+        existingCar.setClient(client);
+        existingCar.setCarModel(request.getCarModel());
+        existingCar.setCarColor(request.getCarColor());
+        existingCar.setCarNumberPlate(request.getCarNumberPlate());
 
-        car.setClient(client);
-        car.setCarModel(request.getCarModel());
-        car.setCarColor(request.getCarColor());
-        car.setCarNumberPlate(request.getCarNumberPlate());
-
-        car = carRepository.save(car);
+        Car updateCar = carRepository.save(existingCar);
 
         UpdateCarResponse response = new UpdateCarResponse();
 
-        response.setCarId(car.getId());
-        response.setClientId(car.getClient().getId());
-        response.setCarModel(car.getCarModel());
-        response.setCarColor(car.getCarColor());
-        response.setCarNumberPlate(car.getCarNumberPlate());
+        response.setCarId(updateCar.getId());
+        response.setClientId(updateCar.getClient().getId());
+        response.setCarModel(updateCar.getCarModel());
+        response.setCarColor(updateCar.getCarColor());
+        response.setCarNumberPlate(updateCar.getCarNumberPlate());
 
         return response;
     }
