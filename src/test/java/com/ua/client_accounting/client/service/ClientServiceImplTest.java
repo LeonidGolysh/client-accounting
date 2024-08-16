@@ -6,6 +6,7 @@ import com.ua.client_accounting.client.dto.update.UpdateClientRequest;
 import com.ua.client_accounting.client.dto.update.UpdateClientResponse;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.repository.ClientRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -22,11 +23,18 @@ import static org.mockito.Mockito.*;
 
 class ClientServiceImplTest {
 
+    static UUID clientId;
+
     @InjectMocks
     private ClientServiceImpl clientServiceImpl;
 
     @Mock
     private ClientRepository clientRepository;
+
+    @BeforeAll
+    static void setUpBeforeClass() {
+        clientId = UUID.randomUUID();
+    }
 
     @BeforeEach
     public void setUp() {
@@ -36,8 +44,8 @@ class ClientServiceImplTest {
     @Test
     void getAllClientsTest() {
         //Arrange
-        Client client1 = new Client(UUID.randomUUID(), "Client 1", "123-456-7890");
-        Client client2 = new Client(UUID.randomUUID(), "Client 2", "098-765-4321");
+        Client client1 = new Client(clientId, "Client 1", "123-456-7890");
+        Client client2 = new Client(clientId, "Client 2", "098-765-4321");
 
         List<Client> mockClients = Arrays.asList(client1, client2);
         when(clientRepository.findAll()).thenReturn(mockClients);
@@ -59,7 +67,6 @@ class ClientServiceImplTest {
     @Test
     void getClientById_Success_Test() {
         //Arrange
-        UUID clientId = UUID.randomUUID();
         Client client = new Client(clientId, "Client 1", "123-456-7890");
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
@@ -79,8 +86,6 @@ class ClientServiceImplTest {
     @Test
     void getClientById_NotFound_Test() {
         //Arrange
-        UUID clientId = UUID.randomUUID();
-
         when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 
         //Act & Assert
@@ -100,16 +105,15 @@ class ClientServiceImplTest {
         request.setName("New Client");
         request.setPhoneNumber("1234567890");
 
-        UUID generateClientId = UUID.randomUUID();
         Client client = new Client();
 
-        client.setId(generateClientId);
+        client.setId(clientId);
         client.setName(request.getName());
         client.setPhoneNumber(request.getPhoneNumber());
 
         when(clientRepository.save(any(Client.class))).thenAnswer(invocationOnMock -> {
             Client savedClient = invocationOnMock.getArgument(0);
-            savedClient.setId(generateClientId);    // Simulate ID generation on save
+            savedClient.setId(clientId);    // Simulate ID generation on save
             return savedClient;
         });
 
@@ -118,7 +122,7 @@ class ClientServiceImplTest {
 
         //Assert
         assertNotNull(response);
-        assertEquals(generateClientId, response.getClientId());
+        assertEquals(clientId, response.getClientId());
 
         verify(clientRepository, times(1)).save(any(Client.class));
     }
@@ -126,7 +130,6 @@ class ClientServiceImplTest {
     @Test
     void deleteClient_Success_Test(){
         //Arrange
-        UUID clientId = UUID.randomUUID();
         Client client = new Client(clientId, "Client 1", "123-4567890");
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
@@ -141,8 +144,6 @@ class ClientServiceImplTest {
     @Test
     void deleteClient_NotFound_Test(){
         //Arrange
-        UUID clientId = UUID.randomUUID();
-
         when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -158,7 +159,6 @@ class ClientServiceImplTest {
     @Test
     void updateClient_Success_Test(){
         //Arrange
-        UUID clientId = UUID.randomUUID();
         Client existingClient = new Client(clientId, "Exist Client", "1112345890");
 
         UpdateClientRequest request = new UpdateClientRequest();
@@ -184,7 +184,6 @@ class ClientServiceImplTest {
     @Test
     void updateClient_NotFount_Test(){
         //Arrange
-        UUID clientId = UUID.randomUUID();
         UpdateClientRequest request = new UpdateClientRequest();
         request.setName("Update Client");
         request.setPhoneNumber("1116789890");
