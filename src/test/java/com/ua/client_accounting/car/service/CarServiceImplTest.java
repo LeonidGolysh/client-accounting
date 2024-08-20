@@ -113,8 +113,8 @@ class CarServiceImplTest {
            carService.getCarById(carId);
         });
 
-        assertEquals("Car Not Found", exception.getMessage());
-
+//        assertEquals("Car Not Found", exception.getMessage());
+        assertEquals("Car with " + carId + " not found", exception.getMessage());
         verify(carRepository, times(1)).findById(carId);
     }
 
@@ -195,7 +195,7 @@ class CarServiceImplTest {
            carService.deleteCar(carId);
         });
 
-        assertEquals("Car Not Found", exception.getMessage());
+        assertEquals("Car with " + carId + " not found", exception.getMessage());
         verify(carRepository, times(0)).delete(any(Car.class));
     }
 
