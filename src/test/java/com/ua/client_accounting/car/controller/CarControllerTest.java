@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class CarControllerTest {
@@ -119,5 +118,18 @@ class CarControllerTest {
                 .andExpect(jsonPath("$.carId").value(carId.toString()));
 
         verify(carService, times(1)).createCar(any(CreateCarRequest.class));
+    }
+
+    @Test
+    void deleteCarTest() throws Exception {
+        //Arrange
+        doNothing().when(carService).deleteCar(carId);
+
+        //Act & Assert
+        mockMvc.perform(delete("/api/V2/cars/delete/" + carId.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        verify(carService, times(1)).deleteCar(carId);
     }
 }
