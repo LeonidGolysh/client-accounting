@@ -7,6 +7,7 @@ import com.ua.client_accounting.client.dto.update.UpdateClientRequest;
 import com.ua.client_accounting.client.dto.update.UpdateClientResponse;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.service.ClientService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,16 +29,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class ClientControllerTest {
 
+    static UUID clientId;
+
     @Mock
-    private ClientService clientService;
+    ClientService clientService;
 
     @InjectMocks
-    private ClientController clientController;
+    ClientController clientController;
 
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeAll
+    static void setUpBeforeClass() {
+        clientId = UUID.randomUUID();
+    }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(clientController).build();
     }
@@ -49,14 +58,12 @@ class ClientControllerTest {
         request.setName("New Client");
         request.setPhoneNumber("123-4567");
 
-        UUID generateId = UUID.randomUUID();
         CreateClientResponse response = new CreateClientResponse();
-        response.setClientId(generateId);
+        response.setClientId(clientId);
 
         when(clientService.createClient(any(CreateClientRequest.class))).thenReturn(response);
 
         //Convert request to JSON
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(request);
 
         //Act & Assert
@@ -65,7 +72,7 @@ class ClientControllerTest {
                 .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.clientId").value(generateId.toString()));
+                .andExpect(jsonPath("$.clientId").value(clientId.toString()));
 
         verify(clientService, times(1)).createClient(any(CreateClientRequest.class));
     }
@@ -73,16 +80,15 @@ class ClientControllerTest {
     @Test
     void getAllClientTest() throws Exception{
         //Arrange
-        Client client1 = new Client(UUID.randomUUID(), "Client 1", "123-456-7890");
-        Client client2 = new Client(UUID.randomUUID(), "Client 2", "098-765-4321");
+        Client client1 = new Client(clientId, "Client 1", "123-456-7890");
+        Client client2 = new Client(clientId, "Client 2", "098-765-4321");
 
         List<Client> clients = Arrays.asList(client1, client2);
 
         when(clientService.getAllClients()).thenReturn(clients);
 
         //Convert clients to JSON
-        ObjectMapper objectMapper = new ObjectMapper();
-        String clientsJson = objectMapper.writeValueAsString(clients);
+         String clientsJson = objectMapper.writeValueAsString(clients);
 
         //Act & Assert
         mockMvc.perform(get("/api/V2/clients")
@@ -97,13 +103,11 @@ class ClientControllerTest {
     @Test
     void getClient_Success_Test() throws Exception {
         //Arrange
-        UUID clientId = UUID.randomUUID();
         Client client = new Client(clientId, "Client", "123-456-7890");
 
         when(clientService.getClientById(clientId)).thenReturn(client);
 
         //Convert client to JSON
-        ObjectMapper objectMapper = new ObjectMapper();
         String clientJson = objectMapper.writeValueAsString(client);
 
         //Act & Assert
@@ -119,8 +123,6 @@ class ClientControllerTest {
     @Test
     void deleteClient_Success_Test() throws Exception {
         //Arrange
-        UUID clientId = UUID.randomUUID();
-
         doNothing().when(clientService).deleteClient(clientId);
 
         //Act & Assert
@@ -134,8 +136,6 @@ class ClientControllerTest {
     @Test
     void updateClientTest() throws Exception{
         //Arrange
-        UUID clientId = UUID.randomUUID();
-
         UpdateClientRequest request = new UpdateClientRequest();
         request.setName("Update Client");
         request.setPhoneNumber("111-6789");
@@ -147,11 +147,8 @@ class ClientControllerTest {
 
         when(clientService.updateClient(eq(clientId), any(UpdateClientRequest.class))).thenReturn(response);
 
-        //Convert request to JSON
-        ObjectMapper objectMapper = new ObjectMapper();
+        //Convert request & response to JSON
         String requestJson = objectMapper.writeValueAsString(request);
-
-        //Convert response to JSON
         String responseJson = objectMapper.writeValueAsString(response);
 
         //Act & Assert

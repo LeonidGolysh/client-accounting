@@ -26,10 +26,10 @@ class ClientServiceImplTest {
     static UUID clientId;
 
     @InjectMocks
-    private ClientServiceImpl clientServiceImpl;
+    ClientServiceImpl clientServiceImpl;
 
     @Mock
-    private ClientRepository clientRepository;
+    ClientRepository clientRepository;
 
     @BeforeAll
     static void setUpBeforeClass() {
