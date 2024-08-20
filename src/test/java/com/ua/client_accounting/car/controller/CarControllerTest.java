@@ -3,6 +3,8 @@ package com.ua.client_accounting.car.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ua.client_accounting.car.dto.create.CreateCarRequest;
 import com.ua.client_accounting.car.dto.create.CreateCarResponse;
+import com.ua.client_accounting.car.dto.update.UpdateCarRequest;
+import com.ua.client_accounting.car.dto.update.UpdateCarResponse;
 import com.ua.client_accounting.car.entity.Car;
 import com.ua.client_accounting.car.service.CarService;
 import com.ua.client_accounting.client.entity.Client;
@@ -131,5 +133,37 @@ class CarControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(carService, times(1)).deleteCar(carId);
+    }
+
+    @Test
+    void updateCarTest() throws Exception {
+        //Arrange
+        UpdateCarRequest request = new UpdateCarRequest();
+        request.setClientId(clientId);
+        request.setCarModel("BMW");
+        request.setCarColor("Red");
+        request.setCarNumberPlate("ABC123");
+
+        UpdateCarResponse response = new UpdateCarResponse();
+        response.setCarId(carId);
+        response.setClientId(clientId);
+        response.setCarModel("BMW");
+        response.setCarColor("Red");
+        response.setCarNumberPlate("ABC123");
+
+        when(carService.updateCar(eq(carId), any(UpdateCarRequest.class))).thenReturn(response);
+
+        //Convert request & response to JSON
+        String requestJson = objectMapper.writeValueAsString(request);
+        String responseJson = objectMapper.writeValueAsString(response);
+
+        //Act & Assert
+        mockMvc.perform(put("/api/V2/cars/edit/" + carId.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+
+        verify(carService, times(1)).updateCar(eq(carId), any(UpdateCarRequest.class));
     }
 }
