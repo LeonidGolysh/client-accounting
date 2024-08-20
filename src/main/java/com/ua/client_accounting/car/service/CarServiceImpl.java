@@ -5,6 +5,7 @@ import com.ua.client_accounting.car.dto.create.CreateCarResponse;
 import com.ua.client_accounting.car.dto.update.UpdateCarRequest;
 import com.ua.client_accounting.car.dto.update.UpdateCarResponse;
 import com.ua.client_accounting.car.entity.Car;
+import com.ua.client_accounting.car.exception.CarNotFoundException;
 import com.ua.client_accounting.car.repository.CarRepository;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.repository.ClientRepository;
@@ -48,7 +49,7 @@ public class CarServiceImpl implements CarService{
 
     @Override
     public Car getCarById(UUID id) {
-        return carRepository.findById(id).orElseThrow(() -> new RuntimeException("Car Not Found"));
+        return carRepository.findById(id).orElseThrow(() -> new CarNotFoundException("Car with " + id + " not found"));
     }
 
     @Override
