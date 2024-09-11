@@ -1,4 +1,4 @@
-package com.ua.client_accounting.car.dto;
+package com.ua.client_accounting.table.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClientCarDTO {
+public class MainTableDTO {
     private UUID carId;
     private String clientName;
     private String phoneNumber;
