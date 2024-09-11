@@ -1,13 +1,12 @@
 package com.ua.client_accounting.car.controller;
 
 import com.ua.client_accounting.car.dto.ClientCarDTO;
+import com.ua.client_accounting.car.entity.Car;
 import com.ua.client_accounting.car.service.ClientCarServiceImpl;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,5 +42,11 @@ public class ClientCarController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Car> createCarWithClient(@RequestBody ClientCarDTO clientCarDTO) {
+        Car car = clientCarService.createCarWithClient(clientCarDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(car);
     }
 }
