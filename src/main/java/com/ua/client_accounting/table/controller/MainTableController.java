@@ -3,7 +3,9 @@ package com.ua.client_accounting.table.controller;
 import com.ua.client_accounting.table.dto.MainTableDTO;
 import com.ua.client_accounting.car.entity.Car;
 import com.ua.client_accounting.table.service.MainTableService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.hibernate.action.internal.EntityActionVetoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,5 +50,15 @@ public class MainTableController {
     public ResponseEntity<Car> createCarWithClient(@RequestBody MainTableDTO mainTableDTO) {
         Car car = mainTableService.createCarWithClient(mainTableDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(car);
+    }
+
+    @PutMapping("/edit/{carId}")
+    public ResponseEntity<Car> updateCarWithClient(@PathVariable UUID carId, @RequestBody MainTableDTO mainTableDTO) {
+        try {
+            Car updateCar = mainTableService.updateCarWithClient(carId, mainTableDTO);
+            return ResponseEntity.ok(updateCar);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.ua.client_accounting.car.repository.CarRepository;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.repository.ClientRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.AllArgsConstructor;
@@ -74,5 +75,31 @@ public class MainTableServiceImpl implements MainTableService{
         car.setCarNumberPlate(mainTableDTO.getCarNumberPlate());
 
         return carRepository.save(car);
+    }
+
+    @Transactional
+    public Car updateCarWithClient(UUID carId, MainTableDTO mainTableDTO) {
+        //Checking the existence of a car
+        Car existingCar = carRepository.findById(carId)
+                .orElseThrow(() -> new EntityNotFoundException("Car with ID" + carId + " not found"));
+
+        //Update information about client
+        Client client = existingCar.getClient();
+        if (client == null) {
+            client = new Client();  //If client is not connected, create a new one
+        }
+
+        client.setName(mainTableDTO.getClientName());
+        client.setPhoneNumber(mainTableDTO.getPhoneNumber());
+
+        client = clientRepository.save(client);
+
+        existingCar.setClient(client);
+        existingCar.setCarModel(mainTableDTO.getCarModel());
+        existingCar.setCarColor(mainTableDTO.getCarColor());
+        existingCar.setCarColor(mainTableDTO.getCarColor());
+        existingCar.setCarNumberPlate(mainTableDTO.getCarNumberPlate());
+
+        return carRepository.save(existingCar);
     }
 }
