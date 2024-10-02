@@ -102,4 +102,19 @@ public class MainTableServiceImpl implements MainTableService{
 
         return carRepository.save(existingCar);
     }
+
+    @Transactional
+    public void deleteCarAndClientIfNoMoreCars(UUID carId) {
+        Car existingCar = carRepository.findById(carId)
+                .orElseThrow(() -> new EntityNotFoundException("Car with ID " + carId + " not found"));
+
+        Client client = existingCar.getClient();
+
+        carRepository.delete(existingCar);
+
+        List<Car> remainingCars = carRepository.findByClientId(client.getId());
+        if (remainingCars.isEmpty()) {
+            clientRepository.delete(client);
+        }
+    }
 }

@@ -12,4 +12,5 @@ public interface MainTableService {
     List<MainTableDTO> getClientCarByModel(String carModel);
     Car createCarWithClient(MainTableDTO mainTableDTO);
     Car updateCarWithClient(UUID carId, MainTableDTO mainTableDTO);
+    void deleteCarAndClientIfNoMoreCars(UUID carId);
 }
