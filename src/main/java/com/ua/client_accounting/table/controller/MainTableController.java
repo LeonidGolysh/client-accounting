@@ -61,4 +61,14 @@ public class MainTableController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @DeleteMapping("/delete/{carId}")
+    public ResponseEntity<Void> deleteCarAndClient(@PathVariable UUID carId) {
+        try {
+            mainTableService.deleteCarAndClientIfNoMoreCars(carId);
+            return ResponseEntity.noContent().build();
+        }catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
