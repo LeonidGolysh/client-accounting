@@ -1,0 +1,6 @@
+CREATE TABLE orders (
+    id UUID PRIMARY KEY,
+    id_client UUID REFERENCES client(id) ON DELETE CASCADE,
+    id_car UUID REFERENCES car(id) ON DELETE CASCADE,
+    order_date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
