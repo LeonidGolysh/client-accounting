@@ -2,6 +2,7 @@ package com.ua.client_accounting.price.service;
 
 import com.ua.client_accounting.price.dto.create.CreateServicePriceRequest;
 import com.ua.client_accounting.price.dto.create.CreateServicePriceResponse;
+import com.ua.client_accounting.price.dto.update.UpdateServicePriceRequest;
 import com.ua.client_accounting.price.dto.update.UpdateServicePriceResponse;
 import com.ua.client_accounting.price.entity.ServicePrice;
 
@@ -14,7 +15,7 @@ public interface PriceService {
 
     CreateServicePriceResponse createServicePrice(CreateServicePriceRequest request);
 
-    UpdateServicePriceResponse updateServicePrice(Long id, CreateServicePriceRequest request);
+    UpdateServicePriceResponse updateServicePrice(Long id, UpdateServicePriceRequest request);
 
     void deletePrice(Long id);
 }
