@@ -2,6 +2,7 @@ package com.ua.client_accounting.price.service;
 
 import com.ua.client_accounting.price.dto.create.CreateServicePriceRequest;
 import com.ua.client_accounting.price.dto.create.CreateServicePriceResponse;
+import com.ua.client_accounting.price.dto.update.UpdateServicePriceRequest;
 import com.ua.client_accounting.price.dto.update.UpdateServicePriceResponse;
 import com.ua.client_accounting.price.entity.ServicePrice;
 import com.ua.client_accounting.price.repository.PriceRepository;
@@ -39,7 +40,7 @@ public class PriceServiceImpl implements PriceService{
     }
 
     @Override
-    public UpdateServicePriceResponse updateServicePrice(Long id, CreateServicePriceRequest request) {
+    public UpdateServicePriceResponse updateServicePrice(Long id, UpdateServicePriceRequest request) {
         ServicePrice servicePrice = getPriceById(id);
         servicePrice.setServiceName(request.getServiceName());
         servicePrice.setPrice(request.getPrice());
