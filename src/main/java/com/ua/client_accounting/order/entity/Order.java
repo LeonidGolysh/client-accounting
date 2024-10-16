@@ -23,10 +23,6 @@ public class Order {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "id_client")
-    private Client client;
-
-    @ManyToOne
     @JoinColumn(name = "id_car")
     private Car car;
 
