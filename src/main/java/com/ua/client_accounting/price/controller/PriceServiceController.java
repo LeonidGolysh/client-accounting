@@ -34,7 +34,7 @@ public class PriceServiceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServicePrice> getPriceService(@RequestBody Long id) {
+    public ResponseEntity<ServicePrice> getPriceService(@PathVariable Long id) {
         ServicePrice servicePrice = priceService.getPriceById(id);
         return ResponseEntity.ok(servicePrice);
     }
