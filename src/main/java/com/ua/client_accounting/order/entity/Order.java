@@ -33,7 +33,7 @@ public class Order {
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
-    @ManyToOne
+    @ManyToMany
     @JoinTable(
             name = "order_service",
             joinColumns = @JoinColumn(name = "id_order"),

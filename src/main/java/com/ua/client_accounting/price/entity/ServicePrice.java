@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.Set;
 
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -26,6 +27,6 @@ public class ServicePrice {
     @Column(name = "price")
     private BigDecimal price;
 
-    @ManyToMany(mappedBy = "service")
+    @ManyToMany(mappedBy = "servicePriceSet")
     private Set<Order> orders;
 }
