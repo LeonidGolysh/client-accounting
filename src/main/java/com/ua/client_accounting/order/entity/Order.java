@@ -1,7 +1,7 @@
 package com.ua.client_accounting.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ua.client_accounting.car.entity.Car;
-import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.price.entity.ServicePrice;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
