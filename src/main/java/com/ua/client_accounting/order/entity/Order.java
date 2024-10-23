@@ -1,15 +1,13 @@
 package com.ua.client_accounting.order.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ua.client_accounting.car.entity.Car;
-import com.ua.client_accounting.price.entity.ServicePrice;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -22,18 +20,13 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_car")
     private Car car;
 
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
-    @ManyToMany
-    @JoinTable(
-            name = "order_service",
-            joinColumns = @JoinColumn(name = "id_order"),
-            inverseJoinColumns = @JoinColumn(name = "id_service")
-    )
-    private Set<ServicePrice> servicePriceSet;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderServicePriceEntity> orderServicePriceEntityList;
 }
