@@ -1,10 +1,10 @@
 package com.ua.client_accounting.order.controller;
 
+import com.ua.client_accounting.order.dto.OrderDTO;
 import com.ua.client_accounting.order.dto.create.CreateOrderRequest;
 import com.ua.client_accounting.order.dto.create.CreateOrderResponse;
 import com.ua.client_accounting.order.dto.update.UpdateOrderRequest;
 import com.ua.client_accounting.order.dto.update.UpdateOrderResponse;
-import com.ua.client_accounting.order.entity.Order;
 import com.ua.client_accounting.order.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +23,8 @@ public class OrderController {
     private OrderService orderService;
 
     @GetMapping
-    public ResponseEntity<List<Order>> getAllOrders() {
-        List<Order> orderList = orderService.getAllOrders();
+    public ResponseEntity<List<OrderDTO>> getAllOrders() {
+        List<OrderDTO> orderList = orderService.getAllOrders();
         return ResponseEntity.ok(orderList);
     }
 
@@ -35,9 +35,9 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable UUID id) {
-        Order order = orderService.getOrderById(id);
-        return ResponseEntity.ok(order);
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable UUID id) {
+        OrderDTO orderDTO = orderService.getOrderById(id);
+        return ResponseEntity.ok(orderDTO);
     }
 
     @PutMapping("/edit/{id}")

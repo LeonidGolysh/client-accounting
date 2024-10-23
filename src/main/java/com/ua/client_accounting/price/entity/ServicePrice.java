@@ -1,13 +1,11 @@
 package com.ua.client_accounting.price.entity;
 
-import com.ua.client_accounting.order.entity.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 
 @Entity
@@ -26,7 +24,4 @@ public class ServicePrice {
 
     @Column(name = "price")
     private BigDecimal price;
-
-    @ManyToMany(mappedBy = "servicePriceSet")
-    private Set<Order> orders;
 }
