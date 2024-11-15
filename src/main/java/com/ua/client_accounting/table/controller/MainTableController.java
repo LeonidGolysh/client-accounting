@@ -1,11 +1,14 @@
 package com.ua.client_accounting.table.controller;
 
+import com.ua.client_accounting.order.dto.OrderDTO;
+import com.ua.client_accounting.order.dto.create.CreateOrderResponse;
+import com.ua.client_accounting.order.entity.Order;
 import com.ua.client_accounting.table.dto.MainTableDTO;
 import com.ua.client_accounting.car.entity.Car;
 import com.ua.client_accounting.table.service.MainTableService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.hibernate.action.internal.EntityActionVetoException;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +24,9 @@ public class MainTableController {
     private MainTableService mainTableService;
 
     @GetMapping
-    public ResponseEntity<List<MainTableDTO>> getClientCars() {
-        List<MainTableDTO> clientCarDTOS = mainTableService.getClientCars();
-        return ResponseEntity.ok(clientCarDTOS);
+    public ResponseEntity<List<MainTableDTO>> getAll() {
+        List<MainTableDTO> allClients = mainTableService.getAllClients();
+        return ResponseEntity.ok(allClients);
     }
 
     @GetMapping("/{id}")
@@ -47,9 +50,9 @@ public class MainTableController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Car> createCarWithClient(@RequestBody MainTableDTO mainTableDTO) {
-        Car car = mainTableService.createCarWithClient(mainTableDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(car);
+    public ResponseEntity<Order> createCarWithClient(@RequestBody MainTableDTO mainTableDTO) {
+        Order order = mainTableService.createCarWithClient(mainTableDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     @PutMapping("/edit/{carId}")

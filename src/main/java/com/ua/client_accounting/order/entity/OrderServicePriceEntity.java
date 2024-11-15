@@ -1,5 +1,6 @@
 package com.ua.client_accounting.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ua.client_accounting.price.entity.ServicePrice;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -14,13 +15,14 @@ public class OrderServicePriceEntity {
     @EmbeddedId
     private OrderServicePriceId id = new OrderServicePriceId();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("idOrder")
     @JoinColumn(name = "id_order")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonBackReference
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("idService")
     @JoinColumn(name = "id_service")
     private ServicePrice servicePrice;
