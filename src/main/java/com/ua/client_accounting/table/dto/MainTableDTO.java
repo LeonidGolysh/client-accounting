@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -16,4 +18,7 @@ public class MainTableDTO {
     private String carModel;
     private String carColor;
     private String carNumberPlate;
+    private Object services;
+    private LocalDateTime orderDate;
+    private BigDecimal totalPrice;
 }
