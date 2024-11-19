@@ -1,6 +1,5 @@
 package com.ua.client_accounting.table.service;
 
-import com.ua.client_accounting.car.entity.Car;
 import com.ua.client_accounting.order.entity.Order;
 import com.ua.client_accounting.table.dto.MainTableDTO;
 
@@ -12,6 +11,6 @@ public interface MainTableService {
     MainTableDTO getClientCarById(UUID carId);
     List<MainTableDTO> getClientCarByModel(String carModel);
     Order createCarWithClient(MainTableDTO mainTableDTO);
-    Car updateCarWithClient(UUID carId, MainTableDTO mainTableDTO);
+    Order updateCarWithClient(UUID orderId, MainTableDTO mainTableDTO);
     void deleteCarAndClientIfNoMoreCars(UUID carId);
 }
