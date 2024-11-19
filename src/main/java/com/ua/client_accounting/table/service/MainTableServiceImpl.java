@@ -3,6 +3,7 @@ package com.ua.client_accounting.table.service;
 import com.ua.client_accounting.order.entity.Order;
 import com.ua.client_accounting.order.entity.OrderServicePriceEntity;
 import com.ua.client_accounting.order.repository.OrderRepository;
+import com.ua.client_accounting.order.repository.OrderServiceRepository;
 import com.ua.client_accounting.price.entity.ServicePrice;
 import com.ua.client_accounting.price.repository.PriceRepository;
 import com.ua.client_accounting.table.dto.MainTableDTO;
@@ -29,6 +30,7 @@ public class MainTableServiceImpl implements MainTableService{
     private final CarRepository carRepository;
     private final PriceRepository priceRepository;
     private final OrderRepository orderRepository;
+    private final OrderServiceRepository orderServiceRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -91,20 +93,23 @@ public class MainTableServiceImpl implements MainTableService{
 
     @Transactional
     public Order createCarWithClient(MainTableDTO mainTableDTO) {
+        Client client = clientRepository.findByNameAndPhoneNumber(mainTableDTO.getClientName(), mainTableDTO.getPhoneNumber())
+                .orElseGet(() -> {
+                    Client newClient = new Client();
+                    newClient.setName(mainTableDTO.getClientName());
+                    newClient.setPhoneNumber(mainTableDTO.getPhoneNumber());
+                    return clientRepository.save(newClient);
+                });
 
-        Client client = new Client();
-        client.setName(mainTableDTO.getClientName());
-        client.setPhoneNumber(mainTableDTO.getPhoneNumber());
-        client = clientRepository.save(client);
-
-        Car car = new Car();
-        car.setClient(client);
-        car.setCarModel(mainTableDTO.getCarModel());
-        car.setCarColor(mainTableDTO.getCarColor());
-        car.setCarNumberPlate(mainTableDTO.getCarNumberPlate());
-        car = carRepository.save(car);
-
-        System.out.println("Services IDs: " + mainTableDTO.getServices());
+        Car car = carRepository.findByCarNumberPlate(mainTableDTO.getCarNumberPlate())
+                .orElseGet(() -> {
+                    Car newCar = new Car();
+                    newCar.setClient(client);
+                    newCar.setCarModel(mainTableDTO.getCarModel());
+                    newCar.setCarColor(mainTableDTO.getCarColor());
+                    newCar.setCarNumberPlate(mainTableDTO.getCarNumberPlate());
+                    return carRepository.save(newCar);
+                });
 
         Set<Long> serviceIds = convertServicesToIds(mainTableDTO.getServices());
 
@@ -207,6 +212,13 @@ public class MainTableServiceImpl implements MainTableService{
                 .orElseThrow(() -> new EntityNotFoundException("Car with ID " + carId + " not found"));
 
         Client client = existingCar.getClient();
+
+        List<Order> orders = orderRepository.findByCar(existingCar);
+        for (Order order : orders) {
+            orderServiceRepository.deleteAll(order.getOrderServicePriceEntityList());
+
+            orderRepository.delete(order);
+        }
 
         carRepository.delete(existingCar);
 
