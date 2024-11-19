@@ -130,9 +130,8 @@ public class MainTableServiceImpl implements MainTableService{
 
             order.getOrderServicePriceEntityList().add(orderServicePriceEntity);
         });
-        orderRepository.save(order);
 
-        return order;
+        return orderRepository.save(order);
     }
 
     private Set<Long> convertServicesToIds(Object services) {
