@@ -155,13 +155,13 @@ public class MainTableServiceImpl implements MainTableService{
     }
 
     @Transactional
-    public Car updateCarWithClient(UUID carId, MainTableDTO mainTableDTO) {
-        //Checking the existence of a car
-        Car existingCar = carRepository.findById(carId)
-                .orElseThrow(() -> new EntityNotFoundException("Car with ID" + carId + " not found"));
+    public Order updateCarWithClient(UUID orderId, MainTableDTO mainTableDTO) {
+        Order existOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order with ID " + orderId + " not found"));
 
-        //Update information about client
-        Client client = existingCar.getClient();
+        Car car = existOrder.getCar();
+
+        Client client = car.getClient();
         if (client == null) {
             client = new Client();  //If client is not connected, create a new one
         }
@@ -171,13 +171,34 @@ public class MainTableServiceImpl implements MainTableService{
 
         client = clientRepository.save(client);
 
-        existingCar.setClient(client);
-        existingCar.setCarModel(mainTableDTO.getCarModel());
-        existingCar.setCarColor(mainTableDTO.getCarColor());
-        existingCar.setCarColor(mainTableDTO.getCarColor());
-        existingCar.setCarNumberPlate(mainTableDTO.getCarNumberPlate());
+        car.setClient(client);
+        car.setCarModel(mainTableDTO.getCarModel());
+        car.setCarColor(mainTableDTO.getCarColor());
+        car.setCarColor(mainTableDTO.getCarColor());
+        car.setCarNumberPlate(mainTableDTO.getCarNumberPlate());
+        carRepository.save(car);
 
-        return carRepository.save(existingCar);
+        if (mainTableDTO.getServices() != null) {
+            Set<Long> serviceIds = convertServicesToIds(mainTableDTO.getServices());
+
+            Set<ServicePrice> servicePriceSet = serviceIds.stream()
+                    .map(serviceId -> priceRepository.findById(serviceId)
+                            .orElseThrow(() -> new RuntimeException("Service not found ID: " + serviceId)))
+                    .collect(Collectors.toSet());
+
+                List<OrderServicePriceEntity> updatedServiceList = new ArrayList<>();
+                servicePriceSet.forEach(servicePrice -> {
+                    OrderServicePriceEntity orderServicePriceEntity = new OrderServicePriceEntity();
+                    orderServicePriceEntity.setOrder(existOrder);
+                    orderServicePriceEntity.setServicePrice(servicePrice);
+                    updatedServiceList.add(orderServicePriceEntity);
+                });
+                existOrder.getOrderServicePriceEntityList().clear();
+                existOrder.getOrderServicePriceEntityList().addAll(updatedServiceList);
+        }
+
+        existOrder.setOrderDate(mainTableDTO.getOrderDate());
+        return orderRepository.save(existOrder);
     }
 
     @Transactional

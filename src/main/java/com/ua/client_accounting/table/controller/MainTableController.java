@@ -55,10 +55,10 @@ public class MainTableController {
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
-    @PutMapping("/edit/{carId}")
-    public ResponseEntity<Car> updateCarWithClient(@PathVariable UUID carId, @RequestBody MainTableDTO mainTableDTO) {
+    @PutMapping("/edit/{orderId}")
+    public ResponseEntity<Order> updateCarWithClient(@PathVariable UUID orderId, @RequestBody MainTableDTO mainTableDTO) {
         try {
-            Car updateCar = mainTableService.updateCarWithClient(carId, mainTableDTO);
+            Order updateCar = mainTableService.updateCarWithClient(orderId, mainTableDTO);
             return ResponseEntity.ok(updateCar);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
