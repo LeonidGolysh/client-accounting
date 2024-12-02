@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public interface MainTableService {
     List<MainTableDTO> getAllOrders();
-    MainTableDTO getOrderCarById(UUID carId);
+    List<MainTableDTO> getOrderCarById(UUID carId);
     List<MainTableDTO> getOrderCarByModel(String carModel);
-    Order createOrderInfo(MainTableDTO mainTableDTO);
-    Order updateOrderInfo(UUID orderId, MainTableDTO mainTableDTO);
-    void deleteOrderInfo(UUID carId);
+    Order createOrder(MainTableDTO mainTableDTO);
+    Order updateOrder(UUID orderId, MainTableDTO mainTableDTO);
+    void deleteOrder(UUID orderId);
 }

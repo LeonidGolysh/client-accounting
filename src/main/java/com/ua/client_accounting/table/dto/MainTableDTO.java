@@ -13,6 +13,7 @@ import java.util.*;
 @NoArgsConstructor
 public class MainTableDTO {
     private UUID carId;
+    private UUID orderId;
     private String clientName;
     private String phoneNumber;
     private String carModel;

@@ -27,8 +27,8 @@ public class MainTableController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MainTableDTO> getOrderCarById(@PathVariable("id") UUID carId) {
-        MainTableDTO orderCarDTO = mainTableService.getOrderCarById(carId);
+    public ResponseEntity<List<MainTableDTO>> getOrderCarById(@PathVariable("id") UUID carId) {
+        List<MainTableDTO> orderCarDTO = mainTableService.getOrderCarById(carId);
         if (orderCarDTO != null) {
             return ResponseEntity.ok(orderCarDTO);
         } else {
@@ -47,15 +47,15 @@ public class MainTableController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Order> createOrderInfo(@RequestBody MainTableDTO mainTableDTO) {
-        Order order = mainTableService.createOrderInfo(mainTableDTO);
+    public ResponseEntity<Order> createOrder(@RequestBody MainTableDTO mainTableDTO) {
+        Order order = mainTableService.createOrder(mainTableDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     @PutMapping("/edit/{orderId}")
-    public ResponseEntity<Order> updateOrderInfo(@PathVariable UUID orderId, @RequestBody MainTableDTO mainTableDTO) {
+    public ResponseEntity<Order> updateOrder(@PathVariable UUID orderId, @RequestBody MainTableDTO mainTableDTO) {
         try {
-            Order updateOrder = mainTableService.updateOrderInfo(orderId, mainTableDTO);
+            Order updateOrder = mainTableService.updateOrder(orderId, mainTableDTO);
 
             Hibernate.initialize(updateOrder.getCar());
             Hibernate.initialize(updateOrder.getOrderServicePriceEntityList());
@@ -68,10 +68,10 @@ public class MainTableController {
         }
     }
 
-    @DeleteMapping("/delete/{carId}")
-    public ResponseEntity<Void> deleteOrderInfo(@PathVariable UUID carId) {
+    @DeleteMapping("/delete/{orderId}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID orderId) {
         try {
-            mainTableService.deleteOrderInfo(carId);
+            mainTableService.deleteOrder(orderId);
             return ResponseEntity.noContent().build();
         }catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
