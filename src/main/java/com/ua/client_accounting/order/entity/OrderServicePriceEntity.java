@@ -1,6 +1,6 @@
 package com.ua.client_accounting.order.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ua.client_accounting.price.entity.ServicePrice;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,10 +16,10 @@ public class OrderServicePriceEntity {
     private OrderServicePriceId id = new OrderServicePriceId();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @MapsId("idOrder")
     @JoinColumn(name = "id_order")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonBackReference
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -16,6 +16,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,18 +25,19 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class MainTableServiceImpl implements MainTableService{
+public class MainTableServiceImpl implements MainTableService {
 
     private final ClientRepository clientRepository;
     private final CarRepository carRepository;
     private final PriceRepository priceRepository;
     private final OrderRepository orderRepository;
     private final OrderServiceRepository orderServiceRepository;
+    private final ServiceIdConverter converterId = new ServiceIdConverter();
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<MainTableDTO> getAllClients() {
+    public List<MainTableDTO> getAllOrders() {
         return entityManager.createQuery(
                 "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
                         "car.id, client.name, client.phoneNumber, " +
@@ -53,7 +55,7 @@ public class MainTableServiceImpl implements MainTableService{
         ).getResultList();
     }
 
-    public MainTableDTO getClientCarById(UUID carId) {
+    public MainTableDTO getOrderCarById(UUID carId) {
         return entityManager.createQuery(
                 "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
                         "car.id, client.name, client.phoneNumber, " +
@@ -72,7 +74,7 @@ public class MainTableServiceImpl implements MainTableService{
         ).setParameter("carId", carId).getSingleResult();
     }
 
-    public List<MainTableDTO> getClientCarByModel(String carModel) {
+    public List<MainTableDTO> getOrderCarByModel(String carModel) {
         return entityManager.createQuery(
                 "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
                         "car.id, client.name, client.phoneNumber, " +
@@ -92,16 +94,35 @@ public class MainTableServiceImpl implements MainTableService{
     }
 
     @Transactional
-    public Order createCarWithClient(MainTableDTO mainTableDTO) {
-        Client client = clientRepository.findByNameAndPhoneNumber(mainTableDTO.getClientName(), mainTableDTO.getPhoneNumber())
+    public Order createOrderInfo(MainTableDTO mainTableDTO) {
+        Client client = getOrCreateClient(mainTableDTO);
+        Car car = getOrCreateCar(mainTableDTO, client);
+
+        Set<Long> serviceIds = converterId.convertServicesToIds(mainTableDTO.getServices());
+        Set<ServicePrice> servicePriceSet = getServicePrice(serviceIds);
+
+        Order order = new Order();
+        order.setCar(car);
+        order.setOrderDate(mainTableDTO.getOrderDate());
+        order.setOrderServicePriceEntityList(new ArrayList<>());
+
+        addServicesToOrder(order, servicePriceSet);
+
+        return orderRepository.save(order);
+    }
+
+    private Client getOrCreateClient(MainTableDTO mainTableDTO) {
+        return clientRepository.findByNameAndPhoneNumber(mainTableDTO.getClientName(), mainTableDTO.getPhoneNumber())
                 .orElseGet(() -> {
                     Client newClient = new Client();
                     newClient.setName(mainTableDTO.getClientName());
                     newClient.setPhoneNumber(mainTableDTO.getPhoneNumber());
                     return clientRepository.save(newClient);
                 });
+    }
 
-        Car car = carRepository.findByCarNumberPlate(mainTableDTO.getCarNumberPlate())
+    private Car getOrCreateCar(MainTableDTO mainTableDTO, Client client) {
+        return carRepository.findByCarNumberPlate(mainTableDTO.getCarNumberPlate())
                 .orElseGet(() -> {
                     Car newCar = new Car();
                     newCar.setClient(client);
@@ -110,19 +131,16 @@ public class MainTableServiceImpl implements MainTableService{
                     newCar.setCarNumberPlate(mainTableDTO.getCarNumberPlate());
                     return carRepository.save(newCar);
                 });
+    }
 
-        Set<Long> serviceIds = convertServicesToIds(mainTableDTO.getServices());
-
-        Set<ServicePrice> servicePriceSet = serviceIds.stream()
+    private Set<ServicePrice> getServicePrice(Set<Long> serviceIds) {
+        return serviceIds.stream()
                 .map(serviceId -> priceRepository.findById(serviceId)
                         .orElseThrow(() -> new RuntimeException("Service not found")))
                 .collect(Collectors.toSet());
+    }
 
-        Order order = new Order();
-        order.setCar(car);
-        order.setOrderDate(mainTableDTO.getOrderDate());
-        order.setOrderServicePriceEntityList(new ArrayList<>());
-
+    private void addServicesToOrder(Order order, Set<ServicePrice> servicePriceSet) {
         servicePriceSet.forEach(servicePrice -> {
             OrderServicePriceEntity orderServicePriceEntity = new OrderServicePriceEntity();
             orderServicePriceEntity.setOrder(order);
@@ -130,83 +148,83 @@ public class MainTableServiceImpl implements MainTableService{
 
             order.getOrderServicePriceEntityList().add(orderServicePriceEntity);
         });
-
-        return orderRepository.save(order);
-    }
-
-    private Set<Long> convertServicesToIds(Object services) {
-        Set<Long> serviceIds = new HashSet<>();
-
-        if (services instanceof String) {
-            try {
-                serviceIds = Arrays.stream(((String) services).split(","))
-                        .map(String::trim)
-                        .map(Long::parseLong)
-                        .collect(Collectors.toSet());
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid format in services string: " + serviceIds, e);
-            }
-        } else if (services instanceof Collection<?>) {
-            serviceIds = ((Collection<?>) services).stream()
-                    .map(Object::toString)
-                    .map(String::trim)
-                    .map(Long::parseLong)
-                    .collect(Collectors.toSet());
-        } else {
-            throw new IllegalArgumentException("Unsupported services type: " + services.getClass().getName());
-        }
-        return serviceIds;
     }
 
     @Transactional
-    public Order updateCarWithClient(UUID orderId, MainTableDTO mainTableDTO) {
+    public Order updateOrderInfo(UUID orderId, MainTableDTO mainTableDTO) {
         Order existOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with ID " + orderId + " not found"));
 
-        Car car = existOrder.getCar();
+        Client updateClient = updateClient(existOrder.getCar().getClient(), mainTableDTO);
+        Car updateCar = updateCar(existOrder.getCar(), mainTableDTO, updateClient);
 
-        Client client = car.getClient();
+        if (mainTableDTO.getServices() != null) {
+            updateOrderServices(existOrder, mainTableDTO.getServices());
+        }
+
+        existOrder.setOrderDate(mainTableDTO.getOrderDate());
+        Order saveOrder = orderRepository.save(existOrder);
+//        initializeLazyFields(saveOrder);
+        return saveOrder;
+    }
+
+    private void initializeLazyFields(Order order) {
+        Hibernate.initialize(order.getCar());
+        if (order.getCar() != null) {
+            Hibernate.initialize(order.getCar().getClient());
+        }
+
+        Hibernate.initialize(order.getOrderServicePriceEntityList());
+
+        order.getOrderServicePriceEntityList().forEach(entity ->
+                Hibernate.initialize(entity.getServicePrice()));
+    }
+
+    private Client updateClient(Client client, MainTableDTO mainTableDTO) {
         if (client == null) {
             client = new Client();  //If client is not connected, create a new one
         }
 
         client.setName(mainTableDTO.getClientName());
         client.setPhoneNumber(mainTableDTO.getPhoneNumber());
+        return clientRepository.save(client);
+    }
 
-        client = clientRepository.save(client);
-
+    private Car updateCar(Car car, MainTableDTO mainTableDTO, Client client) {
         car.setClient(client);
         car.setCarModel(mainTableDTO.getCarModel());
         car.setCarColor(mainTableDTO.getCarColor());
-        car.setCarColor(mainTableDTO.getCarColor());
         car.setCarNumberPlate(mainTableDTO.getCarNumberPlate());
-        carRepository.save(car);
+        return carRepository.save(car);
+    }
 
-        if (mainTableDTO.getServices() != null) {
-            Set<Long> serviceIds = convertServicesToIds(mainTableDTO.getServices());
+    private void updateOrderServices(Order existOrder, Object services) {
+        Set<Long> newServiceIds = converterId.convertServicesToIds(services);
+        Set<Long> existingServiceIds = existOrder.getOrderServicePriceEntityList().stream()
+                .map(orderServicePriceEntity -> orderServicePriceEntity.getServicePrice().getId())
+                .collect(Collectors.toSet());
 
-            Set<ServicePrice> servicePriceSet = serviceIds.stream()
-                    .map(serviceId -> priceRepository.findById(serviceId)
-                            .orElseThrow(() -> new RuntimeException("Service not found ID: " + serviceId)))
-                    .collect(Collectors.toSet());
+        List<OrderServicePriceEntity> toRemove = existOrder.getOrderServicePriceEntityList().stream()
+                .filter(orderServicePriceEntity -> !newServiceIds.contains(orderServicePriceEntity.getServicePrice().getId()))
+                .collect(Collectors.toList());
+        toRemove.forEach(entity -> existOrder.getOrderServicePriceEntityList().remove(entity));
 
-                List<OrderServicePriceEntity> updatedServiceList = new ArrayList<>();
-                servicePriceSet.forEach(servicePrice -> {
-                    OrderServicePriceEntity orderServicePriceEntity = new OrderServicePriceEntity();
-                    orderServicePriceEntity.setOrder(existOrder);
-                    orderServicePriceEntity.setServicePrice(servicePrice);
-                    updatedServiceList.add(orderServicePriceEntity);
-                });
-                existOrder.getOrderServicePriceEntityList().clear();
-                existOrder.getOrderServicePriceEntityList().addAll(updatedServiceList);
-        }
+        Set<Long> toAdd = newServiceIds.stream()
+                .filter(serviceId -> !existingServiceIds.contains(serviceId))
+                .collect(Collectors.toSet());
 
-        existOrder.setOrderDate(mainTableDTO.getOrderDate());
-        return orderRepository.save(existOrder);
+        Set<ServicePrice> servicePriceSet = getServicePrice(toAdd);
+
+        servicePriceSet.forEach(servicePrice -> {
+            OrderServicePriceEntity orderServicePriceEntity = new OrderServicePriceEntity();
+            orderServicePriceEntity.setOrder(existOrder);
+            orderServicePriceEntity.setServicePrice(servicePrice);
+            existOrder.getOrderServicePriceEntityList().add(orderServicePriceEntity);
+        });
     }
 
     @Transactional
-    public void deleteCarAndClientIfNoMoreCars(UUID carId) {
+    public void deleteOrderInfo(UUID carId) {
         Car existingCar = carRepository.findById(carId)
                 .orElseThrow(() -> new EntityNotFoundException("Car with ID " + carId + " not found"));
 

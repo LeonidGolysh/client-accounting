@@ -1,14 +1,11 @@
 package com.ua.client_accounting.table.controller;
 
-import com.ua.client_accounting.order.dto.OrderDTO;
-import com.ua.client_accounting.order.dto.create.CreateOrderResponse;
 import com.ua.client_accounting.order.entity.Order;
 import com.ua.client_accounting.table.dto.MainTableDTO;
-import com.ua.client_accounting.car.entity.Car;
 import com.ua.client_accounting.table.service.MainTableService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.aspectj.weaver.ast.Or;
+import org.hibernate.Hibernate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/V2/client-car")
+@RequestMapping("/api/clients-accounting")
 @AllArgsConstructor
 public class MainTableController {
 
@@ -25,50 +22,56 @@ public class MainTableController {
 
     @GetMapping
     public ResponseEntity<List<MainTableDTO>> getAll() {
-        List<MainTableDTO> allClients = mainTableService.getAllClients();
-        return ResponseEntity.ok(allClients);
+        List<MainTableDTO> allOrders = mainTableService.getAllOrders();
+        return ResponseEntity.ok(allOrders);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MainTableDTO> getClientCarById(@PathVariable("id") UUID carId) {
-        MainTableDTO clientCarDTO = mainTableService.getClientCarById(carId);
-        if (clientCarDTO != null) {
-            return ResponseEntity.ok(clientCarDTO);
+    public ResponseEntity<MainTableDTO> getOrderCarById(@PathVariable("id") UUID carId) {
+        MainTableDTO orderCarDTO = mainTableService.getOrderCarById(carId);
+        if (orderCarDTO != null) {
+            return ResponseEntity.ok(orderCarDTO);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("/model/{carModel}")
-    public ResponseEntity<List<MainTableDTO>> getClientCarsByModel(@PathVariable("carModel") String carModel) {
-        List<MainTableDTO> clientCarDTOs = mainTableService.getClientCarByModel(carModel);
-        if (!clientCarDTOs.isEmpty()) {
-            return ResponseEntity.ok(clientCarDTOs);
+    public ResponseEntity<List<MainTableDTO>> getOrderCarsByModel(@PathVariable("carModel") String carModel) {
+        List<MainTableDTO> orderCarDTOs = mainTableService.getOrderCarByModel(carModel);
+        if (!orderCarDTOs.isEmpty()) {
+            return ResponseEntity.ok(orderCarDTOs);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Order> createCarWithClient(@RequestBody MainTableDTO mainTableDTO) {
-        Order order = mainTableService.createCarWithClient(mainTableDTO);
+    public ResponseEntity<Order> createOrderInfo(@RequestBody MainTableDTO mainTableDTO) {
+        Order order = mainTableService.createOrderInfo(mainTableDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     @PutMapping("/edit/{orderId}")
-    public ResponseEntity<Order> updateCarWithClient(@PathVariable UUID orderId, @RequestBody MainTableDTO mainTableDTO) {
+    public ResponseEntity<Order> updateOrderInfo(@PathVariable UUID orderId, @RequestBody MainTableDTO mainTableDTO) {
         try {
-            Order updateCar = mainTableService.updateCarWithClient(orderId, mainTableDTO);
-            return ResponseEntity.ok(updateCar);
+            Order updateOrder = mainTableService.updateOrderInfo(orderId, mainTableDTO);
+
+            Hibernate.initialize(updateOrder.getCar());
+            Hibernate.initialize(updateOrder.getOrderServicePriceEntityList());
+            updateOrder.getOrderServicePriceEntityList().forEach(entity ->
+                    Hibernate.initialize(entity.getServicePrice()));
+
+            return ResponseEntity.ok(updateOrder);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/delete/{carId}")
-    public ResponseEntity<Void> deleteCarAndClient(@PathVariable UUID carId) {
+    public ResponseEntity<Void> deleteOrderInfo(@PathVariable UUID carId) {
         try {
-            mainTableService.deleteCarAndClientIfNoMoreCars(carId);
+            mainTableService.deleteOrderInfo(carId);
             return ResponseEntity.noContent().build();
         }catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
