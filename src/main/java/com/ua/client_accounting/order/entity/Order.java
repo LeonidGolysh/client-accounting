@@ -1,7 +1,6 @@
 package com.ua.client_accounting.order.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ua.client_accounting.car.entity.Car;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

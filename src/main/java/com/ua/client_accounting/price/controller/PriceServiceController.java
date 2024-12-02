@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/V2/price-service")
+@RequestMapping("/api/clients-accounting/price-service")
 @AllArgsConstructor
 public class PriceServiceController {
 
