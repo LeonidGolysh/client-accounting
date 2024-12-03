@@ -47,20 +47,20 @@ public class MainTableController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Order> createOrder(@RequestBody MainTableDTO mainTableDTO) {
-        Order order = mainTableService.createOrder(mainTableDTO);
+    public ResponseEntity<MainTableDTO> createOrder(@RequestBody MainTableDTO mainTableDTO) {
+        MainTableDTO order = mainTableService.createOrder(mainTableDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     @PutMapping("/edit/{orderId}")
-    public ResponseEntity<Order> updateOrder(@PathVariable UUID orderId, @RequestBody MainTableDTO mainTableDTO) {
+    public ResponseEntity<MainTableDTO> updateOrder(@PathVariable UUID orderId, @RequestBody MainTableDTO mainTableDTO) {
         try {
-            Order updateOrder = mainTableService.updateOrder(orderId, mainTableDTO);
+            MainTableDTO updateOrder = mainTableService.updateOrder(orderId, mainTableDTO);
 
-            Hibernate.initialize(updateOrder.getCar());
-            Hibernate.initialize(updateOrder.getOrderServicePriceEntityList());
-            updateOrder.getOrderServicePriceEntityList().forEach(entity ->
-                    Hibernate.initialize(entity.getServicePrice()));
+//            Hibernate.initialize(updateOrder.getCar());
+//            Hibernate.initialize(updateOrder.getOrderServicePriceEntityList());
+//            updateOrder.getOrderServicePriceEntityList().forEach(entity ->
+//                    Hibernate.initialize(entity.getServicePrice()));
 
             return ResponseEntity.ok(updateOrder);
         } catch (EntityNotFoundException e) {

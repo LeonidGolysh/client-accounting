@@ -10,7 +10,7 @@ public interface MainTableService {
     List<MainTableDTO> getAllOrders();
     List<MainTableDTO> getOrderCarById(UUID carId);
     List<MainTableDTO> getOrderCarByModel(String carModel);
-    Order createOrder(MainTableDTO mainTableDTO);
-    Order updateOrder(UUID orderId, MainTableDTO mainTableDTO);
+    MainTableDTO createOrder(MainTableDTO mainTableDTO);
+    MainTableDTO updateOrder(UUID orderId, MainTableDTO mainTableDTO);
     void deleteOrder(UUID orderId);
 }

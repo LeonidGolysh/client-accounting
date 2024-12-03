@@ -93,7 +93,7 @@ public class MainTableServiceImpl implements MainTableService {
     }
 
     @Transactional
-    public Order createOrder(MainTableDTO mainTableDTO) {
+    public MainTableDTO createOrder(MainTableDTO mainTableDTO) {
         Client client = getOrCreateClient(mainTableDTO);
         Car car = getOrCreateCar(mainTableDTO, client);
 
@@ -107,7 +107,9 @@ public class MainTableServiceImpl implements MainTableService {
 
         addServicesToOrder(order, servicePriceSet);
 
-        return orderRepository.save(order);
+        Order saveOrder = orderRepository.save(order);
+
+        return MainTableDTO.fromDTO(saveOrder);
     }
 
     private Client getOrCreateClient(MainTableDTO mainTableDTO) {
@@ -150,7 +152,7 @@ public class MainTableServiceImpl implements MainTableService {
     }
 
     @Transactional
-    public Order updateOrder(UUID orderId, MainTableDTO mainTableDTO) {
+    public MainTableDTO updateOrder(UUID orderId, MainTableDTO mainTableDTO) {
         Order existOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with ID " + orderId + " not found"));
 
@@ -164,7 +166,7 @@ public class MainTableServiceImpl implements MainTableService {
         existOrder.setOrderDate(mainTableDTO.getOrderDate());
         Order saveOrder = orderRepository.save(existOrder);
 
-        return saveOrder;
+        return MainTableDTO.fromDTO(saveOrder);
     }
 
     private Client updateClient(Client client, MainTableDTO mainTableDTO) {
@@ -178,6 +180,10 @@ public class MainTableServiceImpl implements MainTableService {
     }
 
     private Car updateCar(Car car, MainTableDTO mainTableDTO, Client client) {
+        if (car == null) {
+            car = new Car();
+        }
+
         car.setClient(client);
         car.setCarModel(mainTableDTO.getCarModel());
         car.setCarColor(mainTableDTO.getCarColor());
