@@ -54,7 +54,7 @@ public class MainTableServiceImpl implements MainTableService {
         ).getResultList();
     }
 
-    public List<MainTableDTO> getOrderCarById(UUID carId) {
+    public List<MainTableDTO> getOrderById(UUID orderId) {
         return entityManager.createQuery(
                 "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
                         "car.id, orders.id, client.name, client.phoneNumber, " +
@@ -66,11 +66,11 @@ public class MainTableServiceImpl implements MainTableService {
                         "JOIN car.client client " +
                         "JOIN orders.orderServicePriceEntityList osp " +
                         "JOIN osp.servicePrice service " +
-                        "WHERE car.id = :carId " +
+                        "WHERE orders.id = :orderId " +
                         "GROUP BY car.id, orders.id, client.name, client.phoneNumber, " +
                         "car.carModel, car.carColor, car.carNumberPlate, orders.orderDate " +
                         "ORDER BY client.name, orders.orderDate", MainTableDTO.class
-        ).setParameter("carId", carId).getResultList();
+        ).setParameter("orderId", orderId).getResultList();
     }
 
     public List<MainTableDTO> getOrderCarByModel(String carModel) {
@@ -164,6 +164,8 @@ public class MainTableServiceImpl implements MainTableService {
         }
 
         existOrder.setOrderDate(mainTableDTO.getOrderDate());
+        existOrder.setCar(updateCar);
+
         Order saveOrder = orderRepository.save(existOrder);
 
         return MainTableDTO.fromDTO(saveOrder);
@@ -180,7 +182,14 @@ public class MainTableServiceImpl implements MainTableService {
     }
 
     private Car updateCar(Car car, MainTableDTO mainTableDTO, Client client) {
-        if (car == null) {
+        Optional<Car> existingCarOptional = carRepository.findByClientIdAndCarNumberPlate(
+                client.getId(), mainTableDTO.getCarNumberPlate());
+
+        if (existingCarOptional.isPresent()) {
+            return existingCarOptional.get();
+        }
+
+        if (car != null && !car.getCarNumberPlate().equals(mainTableDTO.getCarNumberPlate())) {
             car = new Car();
         }
 
