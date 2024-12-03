@@ -1,11 +1,9 @@
 package com.ua.client_accounting.table.controller;
 
-import com.ua.client_accounting.order.entity.Order;
 import com.ua.client_accounting.table.dto.MainTableDTO;
 import com.ua.client_accounting.table.service.MainTableService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +25,10 @@ public class MainTableController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<MainTableDTO>> getOrderCarById(@PathVariable("id") UUID carId) {
-        List<MainTableDTO> orderCarDTO = mainTableService.getOrderCarById(carId);
-        if (orderCarDTO != null) {
-            return ResponseEntity.ok(orderCarDTO);
+    public ResponseEntity<List<MainTableDTO>> getOrderCarById(@PathVariable("id") UUID orderId) {
+        List<MainTableDTO> orderDTO = mainTableService.getOrderById(orderId);
+        if (orderDTO != null) {
+            return ResponseEntity.ok(orderDTO);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -56,11 +54,6 @@ public class MainTableController {
     public ResponseEntity<MainTableDTO> updateOrder(@PathVariable UUID orderId, @RequestBody MainTableDTO mainTableDTO) {
         try {
             MainTableDTO updateOrder = mainTableService.updateOrder(orderId, mainTableDTO);
-
-//            Hibernate.initialize(updateOrder.getCar());
-//            Hibernate.initialize(updateOrder.getOrderServicePriceEntityList());
-//            updateOrder.getOrderServicePriceEntityList().forEach(entity ->
-//                    Hibernate.initialize(entity.getServicePrice()));
 
             return ResponseEntity.ok(updateOrder);
         } catch (EntityNotFoundException e) {
