@@ -58,3 +58,71 @@ To successfully run and develop this project, your system needs to meet the foll
    ```
 
 ## Use
+Once Docker is running, you can run the program. 
+
+First, you need to fill in the table with possible services and price. The application provides a REST API for creating, reading, updating, and deleting data.
+
+Create:
+* **URL:** /api/clients-accounting/price-service/create
+* **Method:** POST
+* **Example of a querty:**
+> http://localhost:8080/api/clients-accounting/price-service/create
+```
+{
+    "serviceName": "Car wash",
+    "price": "500"
+}
+```
+
+Get all and get by id:
+* **URL:** /api/clients-accounting/price-service
+* **URL:** /api/clients-accounting/price-service/{id}
+* **Method:** POST
+* **Path options:**
+   * `id` -  service id
+>http://localhost:8080/api/clients-accounting/price-service
+>http://localhost:8080/api/clients-accounting/price-service/{id}
+
+Update service:
+* **URL:** /api/clients-accounting/price-service/edit/{id}
+* **Method:** PUT
+* **Path options:**
+   * `id` -  service id
+>http://localhost:8080/api/clients-accounting/price-service/edit/{id}
+```
+{
+    "serviceName": "Car wash",
+    "price": "600"
+}
+```
+
+Delete service:
+* **URL:** /api/clients-accounting/price-service/delete/{id}
+* **Method:** DELETE
+* **Path options:**
+   * `id` -  service id
+>http://localhost:8080/api/clients-accounting/price-service/delete/{id}
+
+### Answer
+A successful response for the create method will contain a JSON array with the id of the created service.
+```
+{
+   "id": 4
+}
+```
+A successful response for getting a list of all services or one by id will be a JSON array of all or one service.
+```
+{
+   "id": 1,
+   "serviceName": "service name",
+   "price": 100
+}
+```
+A successful response after updating the information in the table will be a JSON array with updated data.
+```
+{
+   "id": 1,
+   "serviceName": "service name",
+   "price": 200
+}
+```
