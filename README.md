@@ -80,7 +80,9 @@ Get all and get by id:
 * **Method:** POST
 * **Path options:**
    * `id` -  service id
+* **Example of a querty:**
 >http://localhost:8080/api/clients-accounting/price-service
+>
 >http://localhost:8080/api/clients-accounting/price-service/{id}
 
 Update service:
@@ -88,6 +90,7 @@ Update service:
 * **Method:** PUT
 * **Path options:**
    * `id` -  service id
+* **Example of a querty:**
 >http://localhost:8080/api/clients-accounting/price-service/edit/{id}
 ```
 {
@@ -101,6 +104,7 @@ Delete service:
 * **Method:** DELETE
 * **Path options:**
    * `id` -  service id
+* **Example of a querty:**
 >http://localhost:8080/api/clients-accounting/price-service/delete/{id}
 
 ### Answer
@@ -126,3 +130,72 @@ A successful response after updating the information in the table will be a JSON
    "price": 200
 }
 ```
+
+### Filling in the table with clients
+After you have filled in the table with services, you can fill in the table in which the accounting of clients will take place.
+
+To create a client and other data, fill in the JSON array written below. Services are recorded via service IDs:
+* **URL:** /api/clients-accounting/create
+* **Method:** POST
+* **Example of a querty:**
+>http://localhost:8080/api/clients-accounting/create
+```
+{
+    "clientName": "Client Name",
+    "phoneNumber": "Phone Number",
+    "carModel": "Car Model",
+    "carColor": "Car Color",
+    "carNumberPlate": "Number Plate",
+    "services": [
+        "1",
+        "2"
+    ],
+    "orderDate": "2024-07-08T15:30"
+}
+```
+
+Implemented search for clients by order ID or by car model, by default shows the entire list of clients:
+* **URL:** /api/clients-accounting
+* **URL:** /api/clients-accounting/{idOrder}
+* **URL:** /api/clients-accounting/{carModel}
+* **Method:** GET
+* **Path options:**
+   * `idOrder` - order number under which the client is registered
+   * `carModel` - when using search by car model it will display a list of all identical models
+* **Example of a querty:**
+>http://localhost:8080/api/clients-accounting
+>
+>http://localhost:8080/api/clients-accounting/{idOrder}
+>
+>http://localhost:8080/api/clients-accounting/{carModel}
+
+To change the data, specify the order ID and fill in the JSON array similar to that for creation:
+* **URL:** /api/clients-accounting/edit/{idOrder}
+* **Method:** PUT
+* **Path options:**
+   * `idOrder` - order number under which the client is registered
+* **Example of a querty:**
+>http://localhost:8080/api/clients-accounting/edit{idOrder}
+```
+{
+    "clientName": "Client Name",
+    "phoneNumber": "Phone Number",
+    "carModel": "Car Model",
+    "carColor": "Car Color",
+    "carNumberPlate": "Number Plate",
+    "services": [
+        "1",
+        "2"
+    ],
+    "orderDate": "2024-07-08T15:30"
+}
+```
+
+To delete an order, use the order ID:
+* **URL:** /api/clients-accounting/delete/{idOrder}
+* **Method:** DELETE
+* **Path options:**
+   * `idOrder` - order number under which the client is registered
+* **Example of a querty:**
+>http://localhost:8080/api/clients-accounting/delete/{idOrder}
+
