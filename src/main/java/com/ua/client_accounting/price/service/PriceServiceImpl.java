@@ -1,5 +1,6 @@
 package com.ua.client_accounting.price.service;
 
+import com.ua.client_accounting.exception.price.ServiceNotFoundException;
 import com.ua.client_accounting.price.dto.create.CreateServicePriceRequest;
 import com.ua.client_accounting.price.dto.create.CreateServicePriceResponse;
 import com.ua.client_accounting.price.dto.update.UpdateServicePriceRequest;
@@ -23,7 +24,7 @@ public class PriceServiceImpl implements PriceService{
 
    @Override
     public ServicePrice getPriceById(Long id) {
-        return priceRepository.findById(id).orElseThrow(() -> new RuntimeException(id + "Not Found"));
+        return priceRepository.findById(id).orElseThrow(() -> new ServiceNotFoundException("Service with ID " + id + " not found"));
     }
 
     @Override

@@ -25,8 +25,8 @@ public class MainTableController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<MainTableDTO>> getOrderCarById(@PathVariable("id") UUID orderId) {
-        List<MainTableDTO> orderDTO = mainTableService.getOrderById(orderId);
+    public ResponseEntity<MainTableDTO> getOrderCarById(@PathVariable("id") UUID orderId) {
+        MainTableDTO orderDTO = mainTableService.getOrderById(orderId);
         if (orderDTO != null) {
             return ResponseEntity.ok(orderDTO);
         } else {
