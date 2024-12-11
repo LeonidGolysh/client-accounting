@@ -30,6 +30,8 @@ class PriceServiceImplTest {
     @InjectMocks
     private PriceServiceImpl priceService;
 
+    final ServicePrice servicePrice = new ServicePrice(serviceId, "Service 1", new BigDecimal(100.00));
+
     @BeforeAll
     static void setUpBeforeClass() {
         serviceId = 1L;
@@ -53,8 +55,6 @@ class PriceServiceImplTest {
 
     @Test
     void getPriceById_Success_Test() {
-        ServicePrice servicePrice = new ServicePrice(serviceId, "Service 1", new BigDecimal(100.00));
-
         when(priceRepository.findById(serviceId)).thenReturn(Optional.of(servicePrice));
 
         ServicePrice result = priceService.getPriceById(serviceId);
@@ -99,8 +99,6 @@ class PriceServiceImplTest {
 
     @Test
     void updateServicePrice_Success_Test() {
-        ServicePrice servicePrice = new ServicePrice(serviceId, "Service 1", new BigDecimal("100.00"));
-
         UpdateServicePriceRequest request = new UpdateServicePriceRequest();
         request.setServiceName("Update Service 1");
         request.setPrice(new BigDecimal("200.00"));
@@ -139,8 +137,6 @@ class PriceServiceImplTest {
 
     @Test
     void deletePrice_Success_Test() {
-        ServicePrice servicePrice = new ServicePrice(serviceId, "Service 1", new BigDecimal("100.00"));
-
         when(priceRepository.findById(serviceId)).thenReturn(Optional.of(servicePrice));
 
         priceService.deletePrice(serviceId);

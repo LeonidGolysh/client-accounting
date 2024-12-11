@@ -7,7 +7,6 @@ import com.ua.client_accounting.price.dto.update.UpdateServicePriceResponse;
 import com.ua.client_accounting.price.entity.ServicePrice;
 import com.ua.client_accounting.price.service.PriceService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 public class PriceServiceController {
 
-    @Autowired
     private final PriceService priceService;
 
     @GetMapping
