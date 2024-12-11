@@ -1,5 +1,8 @@
 package com.ua.client_accounting.table.service;
 
+import com.ua.client_accounting.exception.order.CarModelNotFoundException;
+import com.ua.client_accounting.exception.order.OrderNotFoundException;
+import com.ua.client_accounting.exception.price.ServiceNotFoundException;
 import com.ua.client_accounting.order.entity.Order;
 import com.ua.client_accounting.order.entity.OrderServicePriceEntity;
 import com.ua.client_accounting.order.repository.OrderRepository;
@@ -13,7 +16,7 @@ import com.ua.client_accounting.car.repository.CarRepository;
 import com.ua.client_accounting.client.entity.Client;
 import com.ua.client_accounting.client.repository.ClientRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,27 +57,34 @@ public class MainTableServiceImpl implements MainTableService {
         ).getResultList();
     }
 
-    public List<MainTableDTO> getOrderById(UUID orderId) {
-        return entityManager.createQuery(
-                "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
-                        "car.id, orders.id, client.name, client.phoneNumber, " +
-                        "car.carModel, car.carColor, car.carNumberPlate, " +
-                        "STRING_AGG(service.serviceName, ', '), " +
-                        "orders.orderDate, SUM(service.price)) " +
-                        "FROM Order orders " +
-                        "JOIN orders.car car " +
-                        "JOIN car.client client " +
-                        "JOIN orders.orderServicePriceEntityList osp " +
-                        "JOIN osp.servicePrice service " +
-                        "WHERE orders.id = :orderId " +
-                        "GROUP BY car.id, orders.id, client.name, client.phoneNumber, " +
-                        "car.carModel, car.carColor, car.carNumberPlate, orders.orderDate " +
-                        "ORDER BY client.name, orders.orderDate", MainTableDTO.class
-        ).setParameter("orderId", orderId).getResultList();
+    public MainTableDTO getOrderById(UUID orderId) {
+        MainTableDTO results;
+        try {
+            results = entityManager.createQuery(
+                    "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
+                            "car.id, orders.id, client.name, client.phoneNumber, " +
+                            "car.carModel, car.carColor, car.carNumberPlate, " +
+                            "STRING_AGG(service.serviceName, ', '), " +
+                            "orders.orderDate, SUM(service.price)) " +
+                            "FROM Order orders " +
+                            "JOIN orders.car car " +
+                            "JOIN car.client client " +
+                            "JOIN orders.orderServicePriceEntityList osp " +
+                            "JOIN osp.servicePrice service " +
+                            "WHERE orders.id = :orderId " +
+                            "GROUP BY car.id, orders.id, client.name, client.phoneNumber, " +
+                            "car.carModel, car.carColor, car.carNumberPlate, orders.orderDate " +
+                            "ORDER BY client.name, orders.orderDate", MainTableDTO.class
+            ).setParameter("orderId", orderId).getSingleResult();
+        } catch (NoResultException e) {
+            throw new OrderNotFoundException("Order with ID: " + orderId + " not found");
+        }
+
+        return results;
     }
 
     public List<MainTableDTO> getOrderCarByModel(String carModel) {
-        return entityManager.createQuery(
+        List<MainTableDTO> results = entityManager.createQuery(
                 "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
                         "car.id, orders.id, client.name, client.phoneNumber, " +
                         "car.carModel, car.carColor, car.carNumberPlate, " +
@@ -90,6 +100,12 @@ public class MainTableServiceImpl implements MainTableService {
                         "car.carModel, car.carColor, car.carNumberPlate, orders.orderDate " +
                         "ORDER BY client.name, orders.orderDate", MainTableDTO.class
         ).setParameter("carModel", carModel).getResultList();
+
+        if (results.isEmpty()) {
+            throw new CarModelNotFoundException(carModel + " not found");
+        }
+
+        return results;
     }
 
     @Transactional
@@ -137,7 +153,7 @@ public class MainTableServiceImpl implements MainTableService {
     private Set<ServicePrice> getServicePrice(Set<Long> serviceIds) {
         return serviceIds.stream()
                 .map(serviceId -> priceRepository.findById(serviceId)
-                        .orElseThrow(() -> new RuntimeException("Service not found")))
+                        .orElseThrow(() -> new ServiceNotFoundException("Service with ID: " + serviceId + " not found")))
                 .collect(Collectors.toSet());
     }
 
@@ -154,7 +170,7 @@ public class MainTableServiceImpl implements MainTableService {
     @Transactional
     public MainTableDTO updateOrder(UUID orderId, MainTableDTO mainTableDTO) {
         Order existOrder = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order with ID " + orderId + " not found"));
+                .orElseThrow(() -> new OrderNotFoundException("Order with ID " + orderId + " not found"));
 
         Client updateClient = updateClient(existOrder.getCar().getClient(), mainTableDTO);
         Car updateCar = updateCar(existOrder.getCar(), mainTableDTO, updateClient);
@@ -228,7 +244,7 @@ public class MainTableServiceImpl implements MainTableService {
     @Transactional
     public void deleteOrder(UUID orderId) {
         Order existingOrder = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order with ID " + orderId + " not found"));
+                .orElseThrow(() -> new OrderNotFoundException("Order with ID " + orderId + " not found"));
 
         orderServiceRepository.deleteAll(existingOrder.getOrderServicePriceEntityList());
 
