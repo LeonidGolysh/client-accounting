@@ -3,12 +3,16 @@ package com.ua.client_accounting.order.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ua.client_accounting.price.entity.ServicePrice;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "order_service")
 public class OrderServicePriceEntity {
 
