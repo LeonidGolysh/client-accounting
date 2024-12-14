@@ -2,6 +2,7 @@ package com.ua.client_accounting.table.dto;
 
 import com.ua.client_accounting.order.entity.Order;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,8 +14,9 @@ import java.util.stream.Collectors;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class MainTableDTO {
-    private UUID carId;
+//    private UUID carId;
     private UUID orderId;
     private String clientName;
     private String phoneNumber;
@@ -27,7 +29,7 @@ public class MainTableDTO {
 
     public static MainTableDTO fromDTO(Order order) {
         return new MainTableDTO(
-                order.getCar().getId(),
+//                order.getCar().getId(),
                 order.getId(),
                 order.getCar().getClient().getName(),
                 order.getCar().getClient().getPhoneNumber(),

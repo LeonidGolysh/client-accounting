@@ -39,10 +39,11 @@ public class MainTableServiceImpl implements MainTableService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Override
     public List<MainTableDTO> getAllOrders() {
         return entityManager.createQuery(
                 "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
-                        "car.id, orders.id, client.name, client.phoneNumber, " +
+                        "orders.id, client.name, client.phoneNumber, " +
                         "car.carModel, car.carColor, car.carNumberPlate, " +
                         "STRING_AGG(service.serviceName, ', '), " +
                         "orders.orderDate, SUM(service.price)) " +
@@ -51,18 +52,19 @@ public class MainTableServiceImpl implements MainTableService {
                         "JOIN car.client client " +
                         "JOIN orders.orderServicePriceEntityList osp " +
                         "JOIN osp.servicePrice service " +
-                        "GROUP BY car.id, orders.id, client.name, client.phoneNumber, " +
+                        "GROUP BY orders.id, client.name, client.phoneNumber, " +
                         "car.carModel, car.carColor, car.carNumberPlate, orders.orderDate " +
                         "ORDER BY client.name, orders.orderDate", MainTableDTO.class
         ).getResultList();
     }
 
+    @Override
     public MainTableDTO getOrderById(UUID orderId) {
         MainTableDTO results;
         try {
             results = entityManager.createQuery(
                     "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
-                            "car.id, orders.id, client.name, client.phoneNumber, " +
+                            "orders.id, client.name, client.phoneNumber, " +
                             "car.carModel, car.carColor, car.carNumberPlate, " +
                             "STRING_AGG(service.serviceName, ', '), " +
                             "orders.orderDate, SUM(service.price)) " +
@@ -72,7 +74,7 @@ public class MainTableServiceImpl implements MainTableService {
                             "JOIN orders.orderServicePriceEntityList osp " +
                             "JOIN osp.servicePrice service " +
                             "WHERE orders.id = :orderId " +
-                            "GROUP BY car.id, orders.id, client.name, client.phoneNumber, " +
+                            "GROUP BY orders.id, client.name, client.phoneNumber, " +
                             "car.carModel, car.carColor, car.carNumberPlate, orders.orderDate " +
                             "ORDER BY client.name, orders.orderDate", MainTableDTO.class
             ).setParameter("orderId", orderId).getSingleResult();
@@ -83,10 +85,11 @@ public class MainTableServiceImpl implements MainTableService {
         return results;
     }
 
+    @Override
     public List<MainTableDTO> getOrderCarByModel(String carModel) {
         List<MainTableDTO> results = entityManager.createQuery(
                 "SELECT new com.ua.client_accounting.table.dto.MainTableDTO(" +
-                        "car.id, orders.id, client.name, client.phoneNumber, " +
+                        "orders.id, client.name, client.phoneNumber, " +
                         "car.carModel, car.carColor, car.carNumberPlate, " +
                         "STRING_AGG(service.serviceName, ', '), " +
                         "orders.orderDate, SUM(service.price)) " +
@@ -96,7 +99,7 @@ public class MainTableServiceImpl implements MainTableService {
                         "JOIN orders.orderServicePriceEntityList osp " +
                         "JOIN osp.servicePrice service " +
                         "WHERE car.carModel = :carModel " +
-                        "GROUP BY car.id, orders.id, client.name, client.phoneNumber, " +
+                        "GROUP BY orders.id, client.name, client.phoneNumber, " +
                         "car.carModel, car.carColor, car.carNumberPlate, orders.orderDate " +
                         "ORDER BY client.name, orders.orderDate", MainTableDTO.class
         ).setParameter("carModel", carModel).getResultList();
@@ -108,6 +111,7 @@ public class MainTableServiceImpl implements MainTableService {
         return results;
     }
 
+    @Override
     @Transactional
     public MainTableDTO createOrder(MainTableDTO mainTableDTO) {
         Client client = getOrCreateClient(mainTableDTO);
@@ -167,6 +171,7 @@ public class MainTableServiceImpl implements MainTableService {
         });
     }
 
+    @Override
     @Transactional
     public MainTableDTO updateOrder(UUID orderId, MainTableDTO mainTableDTO) {
         Order existOrder = orderRepository.findById(orderId)
@@ -241,6 +246,7 @@ public class MainTableServiceImpl implements MainTableService {
         });
     }
 
+    @Override
     @Transactional
     public void deleteOrder(UUID orderId) {
         Order existingOrder = orderRepository.findById(orderId)
