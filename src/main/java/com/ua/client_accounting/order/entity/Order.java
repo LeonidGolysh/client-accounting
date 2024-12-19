@@ -3,10 +3,7 @@ package com.ua.client_accounting.order.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ua.client_accounting.car.entity.Car;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
 @Table(name = "orders")
 public class Order {
     @Id

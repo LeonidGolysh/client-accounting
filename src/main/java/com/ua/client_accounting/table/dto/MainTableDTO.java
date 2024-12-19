@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Builder
 public class MainTableDTO {
-//    private UUID carId;
     private UUID orderId;
     private String clientName;
     private String phoneNumber;
@@ -29,7 +28,6 @@ public class MainTableDTO {
 
     public static MainTableDTO fromDTO(Order order) {
         return new MainTableDTO(
-//                order.getCar().getId(),
                 order.getId(),
                 order.getCar().getClient().getName(),
                 order.getCar().getClient().getPhoneNumber(),
