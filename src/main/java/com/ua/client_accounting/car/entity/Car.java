@@ -3,6 +3,7 @@ package com.ua.client_accounting.car.entity;
 import com.ua.client_accounting.client.entity.Client;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "car")
 public class Car {
     @Id
